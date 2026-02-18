@@ -37,14 +37,14 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: transparent;
+            /* Remove dark overlay */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             pointer-events: auto;
             z-index: 100;
-            backdrop-filter: blur(5px);
         }
 
         .hidden {
@@ -135,6 +135,28 @@
         .btn-container {
             display: flex;
             gap: 20px;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            /* Let clicks pass to individual buttons */
+        }
+
+        #solo-btn {
+            position: absolute;
+            left: 10%;
+            top: 25%;
+            pointer-events: auto;
+        }
+
+        #pvp-btn {
+            position: absolute;
+            right: 15%;
+            top: 25%;
+            /* Aligned with solo-btn */
+            pointer-events: auto;
         }
 
         button {
@@ -251,6 +273,64 @@
             background: transparent;
             padding-left: 0;
             padding-right: 0;
+        }
+
+        .difficulty-btn {
+            padding: 20px 30px;
+            font-size: 1.2rem;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 200px;
+            font-family: inherit;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .difficulty-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* EASY - GREEN */
+        .diff-easy {
+            color: #00ff00;
+            border-color: rgba(0, 255, 0, 0.3);
+            background: rgba(0, 255, 0, 0.05);
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .diff-easy:hover {
+            background: rgba(0, 255, 0, 0.15);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        /* MEDIUM - YELLOW */
+        .diff-medium {
+            color: #ffd700;
+            border-color: rgba(255, 215, 0, 0.3);
+            background: rgba(255, 215, 0, 0.05);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .diff-medium:hover {
+            background: rgba(255, 215, 0, 0.15);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        /* HARD - RED */
+        .diff-hard {
+            color: #ff4500;
+            border-color: rgba(255, 69, 0, 0.3);
+            background: rgba(255, 69, 0, 0.05);
+            text-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
+        }
+
+        .diff-hard:hover {
+            background: rgba(255, 69, 0, 0.15);
+            box-shadow: 0 0 20px rgba(255, 69, 0, 0.3);
         }
 
         .stat-value {
@@ -414,40 +494,48 @@
             transform: translateY(-5px);
         }
 
-        /* SELECTED STATES (Flat Colors, No Neon) */
-        .weapon-btn-solo.selected {
+        /* SELECTED STATES (Color-coded by weapon projectile) */
+        .weapon-btn-solo.selected[data-weapon="sniper"] {
             background: rgba(0, 255, 0, 0.25);
-            /* Glassy Green */
             border-color: #00ff00;
-            color: #fff;
             box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+        }
+
+        .weapon-btn-solo.selected[data-weapon="ar"] {
+            background: rgba(255, 255, 0, 0.25);
+            border-color: #ffff00;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.4);
+        }
+
+        .weapon-btn-solo.selected[data-weapon="smg"] {
+            background: rgba(0, 255, 255, 0.25);
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+        }
+
+        .weapon-btn-solo.selected[data-weapon="pistol"] {
+            background: rgba(255, 0, 0, 0.25);
+            border-color: #ff0000;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
+        }
+
+        .weapon-btn-solo.selected[data-weapon="shotgun"] {
+            background: rgba(255, 136, 0, 0.25);
+            border-color: #ff8800;
+            box-shadow: 0 0 15px rgba(255, 136, 0, 0.4);
+        }
+
+        .weapon-btn-solo.selected {
+            color: #fff;
             backdrop-filter: blur(6px);
         }
 
         .weapon-btn-solo.p1:hover {
-            background: rgba(0, 204, 255, 0.2);
-        }
-
-        .weapon-btn-solo.p1.selected {
-            background: rgba(0, 204, 255, 0.25);
-            /* Glassy Blue */
             border-color: #00ccff;
-            box-shadow: 0 0 15px rgba(0, 204, 255, 0.4);
-            color: #fff;
-            backdrop-filter: blur(6px);
         }
 
         .weapon-btn-solo.p2:hover {
-            background: rgba(255, 0, 255, 0.2);
-        }
-
-        .weapon-btn-solo.p2.selected {
-            background: rgba(255, 0, 255, 0.25);
-            /* Glassy Pink */
             border-color: #ff00ff;
-            box-shadow: 0 0 15px rgba(255, 0, 255, 0.4);
-            color: #fff;
-            backdrop-filter: blur(6px);
         }
 
         /* IN-GAME MENU BTN (Kept as requested, but ensuring z-index) */
@@ -486,11 +574,137 @@
             height: 100%;
             z-index: -1;
             /* Behind UI */
-            background: linear-gradient(180deg, #FFF5EE 0%, #FFDAB9 40%, #FFD700 80%, #90EE90 100%);
-            /* Very Light Sunset */
+            background: transparent;
             overflow: hidden;
-            filter: brightness(1.3) saturate(1.3);
-            /* Strong Global Boost */
+        }
+
+        /* ── COD2-STYLE KILLCAM ── */
+        #killcam-colorgrade {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            /* COD2: warm sepia tone */
+            background: rgba(80, 50, 10, 0.22);
+            mix-blend-mode: multiply;
+        }
+
+        #killcam-impact-flash {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            background: rgba(255, 255, 255, 0.35);
+            transition: opacity 0.08s;
+        }
+
+        /* ── KILLCAM OVERLAY ── */
+        #killcam-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 60;
+            display: none;
+        }
+
+        /* COD2 uses thin black bars, not huge ones */
+        #killcam-bar-top,
+        #killcam-bar-bottom {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            background: #000;
+            transition: height 0.18s ease-out;
+        }
+
+        #killcam-bar-top {
+            top: 0;
+            height: 0;
+        }
+
+        #killcam-bar-bottom {
+            bottom: 0;
+            height: 0;
+        }
+
+        /* COD2: "KILLCAM" sits inside the bottom bar, left-aligned */
+        #killcam-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            padding-left: 28px;
+            box-sizing: border-box;
+            color: #fff;
+            font-size: 0.78rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            font-family: 'Arial Narrow', 'Arial', sans-serif;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+
+        /* Timer bar fills the bottom bar */
+        #killcam-timer-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 52px;
+            background: transparent;
+            overflow: hidden;
+            opacity: 1;
+        }
+
+        #killcam-timer-fill {
+            height: 100%;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.07);
+            transform-origin: left center;
+            transition: transform 0.1s linear;
+        }
+
+        /* COD2 vignette: harder edges */
+        #killcam-vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.6) 100%);
+        }
+
+        /* Hide slow-mo label (not COD2 style) */
+        #killcam-slowmo-label {
+            display: none !important;
+        }
+
+        /* CAPTURA DE LA ÚLTIMA JUGADA */
+        #last-play-frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            pointer-events: none;
         }
 
         /* SCREENS (Make transparent) */
@@ -519,6 +733,8 @@
             height: 100%;
             z-index: 0;
             pointer-events: none;
+            display: none;
+            /* Hide CSS elements for 3D lobby */
         }
 
         /* NEW RELAXED LANDSCAPE CSS */
@@ -591,6 +807,92 @@
             z-index: 3;
             opacity: 0.8;
             border-radius: 20px 20px 0 0;
+        }
+
+        /* RECENT ADDITIONS: CONTROLS SCREEN */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+            max-width: 900px;
+            /* Increased to allow more horizontal space */
+        }
+
+        .controls-column h3 {
+            color: #ffd700;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .control-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            font-size: 1.1rem;
+            color: #eee;
+            gap: 40px;
+            /* Force minimum horizontal separation */
+        }
+
+        .control-key {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        #controls-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            /* Slightly larger for better icon fit */
+            padding: 0;
+            line-height: 0;
+            /* Helps with character centering */
+        }
+
+        .btn-back {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            z-index: 1000;
+        }
+
+        .btn-back::before {
+            content: '';
+            width: 30px;
+            height: 30px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 12H5M12 19l-7-7 7-7'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
         }
 
         /* ROUND TREES (Replacing Pines) */
@@ -764,6 +1066,20 @@
 <body>
     <div id="game-container"></div>
     <div id="ui-layer">
+        <!-- KILLCAM OVERLAY -->
+        <div id="killcam-overlay">
+            <div id="killcam-bar-top"></div>
+            <div id="killcam-bar-bottom"></div>
+            <div id="killcam-vignette"></div>
+            <div id="killcam-colorgrade"></div>
+            <div id="killcam-impact-flash"></div>
+            <div id="killcam-label">KILLCAM</div>
+            <div id="killcam-slowmo-label">● SLOW MOTION</div>
+            <div id="killcam-timer-bar">
+                <div id="killcam-timer-fill"></div>
+            </div>
+        </div>
+
         <button id="ingame-menu-btn" class="hidden">MENU</button>
 
         <!-- SHARED BACKGROUND LAYER -->
@@ -806,30 +1122,85 @@
             </div>
         </div>
 
+        <!-- CAPA CONGELADA DE LA ÚLTIMA JUGADA -->
+        <div id="last-play-frame" class="hidden"></div>
+
         <!-- LOBBY -->
         <div id="lobby" class="screen">
             <!-- Background elements moved to shared layer -->
-            <h1>BLANKSH<span class="crosshair-o">O</span>T</h1>
-            <p>Select Game Mode</p>
+            <h1>SOLOSH<span class="crosshair-o">O</span>T</h1>
+
             <div class="btn-container">
                 <button id="solo-btn" class="btn-transparent">SOLO (vs AI)</button>
                 <button id="pvp-btn" class="btn-transparent">1v1 SPLIT SCREEN</button>
             </div>
+            <button id="controls-btn" class="btn-transparent" title="Controls">⚙</button>
         </div>
+
+        <!-- CONTROLS SCREEN -->
+        <div id="controls-screen" class="screen hidden">
+            <h1
+                style="font-size: 3rem; margin-top: 0; color: rgba(255, 255, 255, 0.9); text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);">
+                CONTROLS</h1>
+            <div class="controls-grid">
+                <!-- Keyboard Column -->
+                <div class="controls-column">
+                    <h3>KEYBOARD</h3>
+                    <div class="control-item"><span>Move</span> <span class="control-key">WASD</span></div>
+                    <div class="control-item"><span>Jump</span> <span class="control-key">SPACE</span></div>
+                    <div class="control-item"><span>Shoot</span> <span class="control-key">L-CLICK</span></div>
+                    <div class="control-item"><span>Aim</span> <span class="control-key">R-CLICK</span></div>
+                    <div class="control-item"><span>Reload</span> <span class="control-key">R</span></div>
+                    <div class="control-item"><span>Sprint</span> <span class="control-key">SHIFT</span></div>
+                </div>
+                <!-- Gamepad Column -->
+                <div class="controls-column">
+                    <h3>GAMEPAD</h3>
+                    <div class="control-item"><span>Move</span> <span class="control-key">L-STICK</span></div>
+                    <div class="control-item"><span>Jump</span> <span class="control-key">×</span></div>
+                    <div class="control-item"><span>Shoot</span> <span class="control-key">R2</span></div>
+                    <div class="control-item"><span>Aim</span> <span class="control-key">L2</span></div>
+                    <div class="control-item"><span>Reload</span> <span class="control-key">□</span></div>
+                    <div class="control-item"><span>Sprint</span> <span class="control-key">L3</span></div>
+                </div>
+            </div>
+            <button id="back-from-controls" class="btn-transparent btn-back"></button>
+        </div>
+
+        <!-- DIFFICULTY SELECTION -->
+        <div id="difficulty-select" class="screen hidden">
+            <h1 style="color:#ffffff; text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);">SELECT DIFFICULTY</h1>
+            <div class="difficulty-container" style="display:flex; gap:20px; margin-bottom: 40px;">
+                <button class="difficulty-btn diff-easy" onclick="selectDifficulty(3)">EASY (3 BOTS)</button>
+                <button class="difficulty-btn diff-medium" onclick="selectDifficulty(5)">MEDIUM (5 BOTS)</button>
+                <button class="difficulty-btn diff-hard" onclick="selectDifficulty(10)">HARD (10 BOTS)</button>
+            </div>
+            <button onclick="backToLobby()" class="btn-transparent btn-back"></button>
+        </div>
+
         <!-- SOLO WEAPON SELECT -->
         <div id="solo-weapon-select" class="screen hidden">
-            <h1 style="color:#00ff00; text-shadow: 0 0 20px #00ff00;">SELECT WEAPON</h1>
-            <div id="solo-weapon-options" style="display:flex; gap:20px; margin-bottom: 40px;"><button
-                    class="weapon-btn-solo" data-weapon="sniper"
-                    onclick="selectSoloWeapon('sniper')">Sniper</button><button class="weapon-btn-solo selected"
-                    data-weapon="ar" onclick="selectSoloWeapon('ar')">Assault Rifle</button><button
-                    class="weapon-btn-solo" data-weapon="smg" onclick="selectSoloWeapon('smg')">SMG</button><button
-                    class="weapon-btn-solo" data-weapon="pistol" onclick="selectSoloWeapon('pistol')">Pistol</button>
-            </div><button id="start-solo-match-btn" class="btn-transparent" style="padding: 15px 50px;">START
-                MISSION</button>
+            <h1 style="color:#ffffff; text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);">SELECT WEAPON</h1>
+            <div id="solo-weapon-options" style="display:flex; gap:20px; margin-bottom: 80px;">
+                <button class="weapon-btn-solo" data-weapon="sniper"
+                    onclick="selectSoloWeapon('sniper')">Sniper</button>
+                <button class="weapon-btn-solo selected" data-weapon="ar" onclick="selectSoloWeapon('ar')">Assault
+                    Rifle</button>
+                <button class="weapon-btn-solo" data-weapon="smg" onclick="selectSoloWeapon('smg')">SMG</button>
+                <button class="weapon-btn-solo" data-weapon="pistol"
+                    onclick="selectSoloWeapon('pistol')">Pistol</button>
+                <button class="weapon-btn-solo" data-weapon="shotgun"
+                    onclick="selectSoloWeapon('shotgun')">Shotgun</button>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:40px; align-items:center;">
+                <button onclick="backToDifficulty()" class="btn-transparent btn-back"></button>
+                <button id="start-solo-match-btn" class="btn-transparent" style="padding: 15px 60px;">START
+                    MISSION</button>
+            </div>
         </div>
         <!-- PVP WEAPON SELECT -->
         <div id="pvp-weapon-select" class="screen hidden" style="position:relative;">
+            <button onclick="backToLobby()" class="btn-transparent btn-back"></button>
             <!-- P1 PANEL (TOP) -->
             <div class="split-panel top"
                 style="position:absolute; top:30px; left:0; width:100%; display:flex; flex-direction:column; align-items:center;">
@@ -845,6 +1216,8 @@
                         onclick="selectPvPWeapon(1, 'smg')">SMG</button>
                     <button class="weapon-btn-solo p1" data-player="1" data-weapon="pistol"
                         onclick="selectPvPWeapon(1, 'pistol')">Pistol</button>
+                    <button class="weapon-btn-solo p1" data-player="1" data-weapon="shotgun"
+                        onclick="selectPvPWeapon(1, 'shotgun')">Shotgun</button>
                 </div>
             </div>
             <!-- P2 PANEL (BOTTOM) -->
@@ -861,6 +1234,8 @@
                         onclick="selectPvPWeapon(2, 'smg')">SMG</button>
                     <button class="weapon-btn-solo p2" data-player="2" data-weapon="pistol"
                         onclick="selectPvPWeapon(2, 'pistol')">Pistol</button>
+                    <button class="weapon-btn-solo p2" data-player="2" data-weapon="shotgun"
+                        onclick="selectPvPWeapon(2, 'shotgun')">Shotgun</button>
                 </div>
             </div>
             <button id="start-pvp-match-btn" class="btn-transparent"
@@ -952,29 +1327,32 @@
             const GRAVITY = -30;
 
             const MODE = {
-                MENU: 0, SOLO: 1, PVP: 2, END: 3, PVP_SELECT: 4, SOLO_SELECT: 5
+                MENU: 0, SOLO: 1, PVP: 2, END: 3, PVP_SELECT: 4, SOLO_SELECT: 5, KILLCAM: 6
             }
 
                 ;
 
             const WEAPONS = {
                 sniper: {
-                    name: "Sniper", dmg: 20, speed: 100, reload: 2000, cd: 800, color: 0x00ff00
+                    name: "Sniper", dmg: 20, speed: 150, reload: 2000, cd: 800, color: 0x00ff00, maxAmmo: 10, range: 200
                 }
 
                 ,
                 ar: {
-                    name: "Assault Rifle", dmg: 10, speed: 60, reload: 2000, cd: 200, color: 0xffff00
+                    name: "Assault Rifle", dmg: 10, speed: 70, reload: 2000, cd: 200, color: 0xffff00, maxAmmo: 30, range: 200
                 }
 
                 ,
                 smg: {
-                    name: "SMG", dmg: 5, speed: 40, reload: 2000, cd: 100, color: 0x00ffff
+                    name: "SMG", dmg: 5, speed: 60, reload: 2000, cd: 100, color: 0x00ffff, maxAmmo: 40, range: 100
                 }
 
                 ,
                 pistol: {
-                    name: "Pistol", dmg: 15, speed: 70, reload: 1000, cd: 400, color: 0xff0000
+                    name: "Pistol", dmg: 15, speed: 60, reload: 1000, cd: 400, color: 0xff0000, maxAmmo: 20, range: 150
+                },
+                shotgun: {
+                    name: "Shotgun", dmg: 25, speed: 60, reload: 3000, cd: 1200, color: 0xff8800, maxAmmo: 8, range: 70
                 }
             }
 
@@ -982,9 +1360,11 @@
             let selectedWeapon = 'ar';
             let p1SelectedWeapon = 'ar';
             let p2SelectedWeapon = 'ar';
+            const lobbyBots = [];
 
             // Globals
             let gameMode = MODE.MENU;
+            let gameEnding = false;   // set to true the moment endGame fires; blocks all AI updates
             const scene = new THREE.Scene();
             scene.background = new THREE.Color(0x87CEEB);
             scene.fog = new THREE.Fog(0x87CEEB, 20, 150);
@@ -1005,6 +1385,15 @@
             const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
             dirLight.position.set(50, 100, 50);
             dirLight.castShadow = true;
+            // Shadow camera configuration for better shadow quality
+            dirLight.shadow.camera.left = -100;
+            dirLight.shadow.camera.right = 100;
+            dirLight.shadow.camera.top = 100;
+            dirLight.shadow.camera.bottom = -100;
+            dirLight.shadow.camera.near = 0.5;
+            dirLight.shadow.camera.far = 500;
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
             scene.add(dirLight);
 
             // -- TERRAIN --
@@ -1166,18 +1555,208 @@
                 }));
                 t.position.y = 1.5;
                 t.castShadow = true;
+                t.userData.isTree = true;
 
                 const l = new THREE.Mesh(new THREE.ConeGeometry(3, 6, 8), new THREE.MeshStandardMaterial({
                     color: 0x1e591e
                 }));
                 l.position.y = 4.5;
                 l.castShadow = true;
+                l.userData.isTree = true;
                 g.add(t);
                 g.add(l);
                 scene.add(g);
             }
 
             treePos.forEach(p => createTree(p.x, p.z));
+
+            // -- STONES --
+            const stonePos = [
+                { x: 10, z: 10, s: 1.0, r: 0.5 },
+                { x: -50, z: 20, s: 2.0, r: 2.1 },
+                { x: 60, z: -30, s: 1.5, r: -1.0 },
+                { x: -20, z: -60, s: 2.5, r: 3.0 },
+                { x: 30, z: 70, s: 1.2, r: 1.5 }
+            ];
+
+            function createStone(x, z, s, r) {
+                const h = getTerrainHeight(x, z);
+                // Use Dodecahedron for a low-poly rock look
+                const geo = new THREE.DodecahedronGeometry(1.5 * s, 0); // Radius 1.5 base * scale
+                const mat = new THREE.MeshStandardMaterial({
+                    color: 0x888888,
+                    flatShading: true,
+                    roughness: 0.8,
+                    metalness: 0.2
+                });
+
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.userData.isStone = true;
+
+                // Embed slightly in ground
+                mesh.position.set(x, h + (0.5 * s), z);
+                mesh.rotation.y = r;
+                mesh.rotation.x = Math.random() * 0.5; // Slight random tilt
+                mesh.rotation.z = Math.random() * 0.5;
+
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                scene.add(mesh);
+            }
+
+            stonePos.forEach(p => createStone(p.x, p.z, p.s, p.r));
+
+            // -- BUSHES --
+            const bushPos = [
+                { x: -35, z: 15,  s: 1.2 },
+                { x: 45,  z: 55,  s: 3.2 },
+                { x: -65, z: -45, s: 1.0 },
+                { x: 25,  z: -75, s: 2.8 },
+                { x: 75,  z: -50, s: 1.3 }
+            ];
+
+            function createBush(x, z, s) {
+                const h = getTerrainHeight(x, z);
+                const g = new THREE.Group();
+                g.position.set(x, h, z);
+
+                const colors = [0x2d6e2d, 0x3a8c3a, 0x245724, 0x4aad3a];
+                const sphereOffsets = [
+                    { ox: 0,      oy: s * 0.7, oz: 0,      r: s * 1.0 },
+                    { ox: s*0.7,  oy: s * 0.4, oz: s*0.3,  r: s * 0.75 },
+                    { ox: -s*0.7, oy: s * 0.4, oz: -s*0.2, r: s * 0.75 },
+                    { ox: s*0.3,  oy: s * 0.3, oz: -s*0.7, r: s * 0.7  },
+                    { ox: -s*0.3, oy: s * 0.5, oz: s*0.6,  r: s * 0.65 },
+                ];
+
+                sphereOffsets.forEach((o, i) => {
+                    const mat = new THREE.MeshStandardMaterial({
+                        color: colors[i % colors.length],
+                        transparent: true,
+                        opacity: 0.82,
+                        roughness: 1,
+                        metalness: 0
+                    });
+                    const mesh = new THREE.Mesh(new THREE.SphereGeometry(o.r, 7, 6), mat);
+                    mesh.position.set(o.ox, o.oy, o.oz);
+                    mesh.castShadow = true;
+                    mesh.userData.isBush = true; // ignorar en raycasts de disparo
+                    g.add(mesh);
+                });
+
+                scene.add(g);
+            }
+
+            bushPos.forEach(b => createBush(b.x, b.z, b.s));
+
+            // Devuelve true si el jugador está dentro de algún arbusto
+            // y no acaba de disparar (en ese caso está expuesto 5s)
+            let bushExposedUntil = 0; // timestamp ms hasta el que el jugador está expuesto tras disparar
+
+            function isPlayerInBush() {
+                if (Date.now() < bushExposedUntil) return false; // disparó — está expuesto
+                for (const b of bushPos) {
+                    const r = b.s * 1.4;
+                    const dx = p1.mesh.position.x - b.x;
+                    const dz = p1.mesh.position.z - b.z;
+                    if (dx * dx + dz * dz < r * r) return true;
+                }
+                return false;
+            }
+
+            function createWeaponModel(weaponType) {
+                const weaponGroup = new THREE.Group();
+                const mat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.3 });
+
+                if (weaponType === 'pistol') {
+                    // Handle at Z=0 (Grip)
+                    const handle = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.3, 0.1), mat);
+                    handle.position.set(0, -0.1, 0);
+                    weaponGroup.add(handle);
+
+                    // Barrel points to +Z (Forward)
+                    const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, 0.35), mat);
+                    barrel.position.set(0, 0.05, 0.15);
+                    weaponGroup.add(barrel);
+                }
+                else if (weaponType === 'smg') {
+                    const body = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.2, 0.3), mat);
+                    body.position.set(0, 0, 0.1);
+                    weaponGroup.add(body);
+
+                    const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.35), mat);
+                    barrel.position.set(0, 0.05, 0.35);
+                    weaponGroup.add(barrel);
+                }
+                else if (weaponType === 'ar') {
+                    const body = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.15, 0.4), mat);
+                    body.position.set(0, 0, 0.15);
+                    weaponGroup.add(body);
+
+                    const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.5), mat);
+                    barrel.position.set(0, 0.04, 0.55);
+                    weaponGroup.add(barrel);
+
+                    const stock = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, 0.25), mat);
+                    stock.position.set(0, -0.05, -0.1);
+                    weaponGroup.add(stock);
+                }
+                else if (weaponType === 'sniper') {
+                    const body = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.15, 0.5), mat);
+                    body.position.set(0, 0, 0.2);
+                    weaponGroup.add(body);
+
+                    const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.9), mat);
+                    barrel.position.set(0, 0.04, 0.85);
+                    weaponGroup.add(barrel);
+
+                    const scope = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.35, 8),
+                        new THREE.MeshStandardMaterial({ color: 0x111111 }));
+                    scope.rotation.z = Math.PI / 2;
+                    scope.position.set(0, 0.15, 0.2);
+                    weaponGroup.add(scope);
+
+                    const stock = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.12, 0.35), mat);
+                    stock.position.set(0, -0.05, -0.15);
+                    weaponGroup.add(stock);
+                }
+                else if (weaponType === 'shotgun') {
+                    // Chunky body + thick short barrel
+                    const body = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.18, 0.45), mat);
+                    body.position.set(0, 0, 0.1);
+                    weaponGroup.add(body);
+
+                    const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.3), mat);
+                    barrel.position.set(0, 0.05, 0.45);
+                    weaponGroup.add(barrel);
+
+                    const pump = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.1, 0.15), mat);
+                    pump.position.set(0, -0.05, 0.3);
+                    weaponGroup.add(pump);
+                }
+
+                // Store barrel tip relative to weapon origin
+                let tipZ = 0.35; // default for pistol
+                if (weaponType === 'smg') tipZ = 0.55;
+                else if (weaponType === 'ar') tipZ = 0.85;
+                else if (weaponType === 'sniper') tipZ = 1.35;
+                else if (weaponType === 'shotgun') tipZ = 0.6;
+
+                const tipPos = new THREE.Vector3(0, 0.05, tipZ);
+                weaponGroup.userData.barrelTip = tipPos;
+
+                // Add Muzzle Flash (Hidden by default)
+                const flash = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.15, 8, 8),
+                    new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.8 })
+                );
+                flash.position.copy(tipPos);
+                flash.visible = false;
+                weaponGroup.add(flash);
+                weaponGroup.userData.muzzleFlash = flash;
+
+                return weaponGroup;
+            }
 
             // -- PLAYER CLASS --
             class Player {
@@ -1248,6 +1827,13 @@
                     eyeR.position.set(0.2, 0.65, 0.35);
                     this.mesh.add(eyeR);
 
+                    // Weapon Model
+                    this.currentWeaponKey = weaponKey;
+                    this.weaponModel = createWeaponModel(weaponKey);
+                    // Add to armL (visual right side from behind)
+                    this.weaponModel.position.set(0, -0.3, 0);
+                    this.armL.add(this.weaponModel);
+
                     this.mesh.position.copy(startPos);
                     scene.add(this.mesh);
 
@@ -1274,12 +1860,16 @@
                     // Load Weapon Stats
                     this.setWeapon(weaponKey);
 
-                    this.flashTimer = 0;
+                    this.recoil = 0;
+                    this.muzzleFlashTimer = 0;
+                    this.hitFlashTimer = null;
                     this.lastTrigger = 0;
+                    this.zoomLevel = 0; // 0 = default, 1 = fully zoomed
+                    this.isExhausted = false;
 
                     // Input State
                     this.input = {
-                        x: 0, y: 0, jump: false, shoot: false, reload: false, sprint: false
+                        x: 0, y: 0, jump: false, shoot: false, reload: false, sprint: false, aim: false
                     }
 
                         ;
@@ -1289,6 +1879,12 @@
                     }
 
                         ;
+
+                    this.zoomLevel = 0; // 0 = default, 1 = fully zoomed
+
+                    // Walking animation state (must init here to avoid NaN on first update)
+                    this.walkCycle = 0;
+                    this.bobPhase = 0;
                 }
 
                 setWeapon(key) {
@@ -1298,15 +1894,28 @@
                     this.reloadTime = w.reload;
                     this.fireRate = w.cd;
                     this.projColor = w.color;
+                    this.maxAmmo = w.maxAmmo || 30;
+                    this.ammo = Math.min(this.ammo, this.maxAmmo);
+                    this.range = w.range || 100;
+
+                    // Swap weapon model if different
+                    if (this.currentWeaponKey !== key && this.weaponModel) {
+                        this.armL.remove(this.weaponModel);
+                        this.currentWeaponKey = key;
+                        this.weaponModel = createWeaponModel(key);
+                        this.weaponModel.position.set(0, -0.3, 0);
+                        this.armL.add(this.weaponModel);
+                    }
                 }
 
                 respawn(pos) {
                     this.mesh.position.copy(pos);
                     this.velocity.set(0, 0, 0);
                     this.hp = 100;
-                    this.ammo = 30;
+                    this.ammo = this.maxAmmo || 30;
                     this.stamina = this.maxStamina; // Reset Stamina
                     this.reloading = false;
+                    this.isExhausted = false;
 
                     this.cameraAngle = {
                         x: 0, y: Math.PI
@@ -1334,9 +1943,9 @@
                         }
                     });
 
-                    clearTimeout(this.flashTimer);
+                    if (this.hitFlashTimer) clearTimeout(this.hitFlashTimer);
 
-                    this.flashTimer = setTimeout(() => {
+                    this.hitFlashTimer = setTimeout(() => {
                         this.mesh.children.forEach(c => {
                             if (c.material && c.material.type === 'MeshStandardMaterial') {
                                 c.material.color.setHex(this.color);
@@ -1350,17 +1959,41 @@
                 update(dt) {
                     if (this.hp <= 0) return;
 
-                    // SAFETY CHECK: NaN Position (Fixes "Sky Glitch")
-                    if (isNaN(this.mesh.position.x) || isNaN(this.mesh.position.y) || isNaN(this.mesh.position.z)) {
-                        console.warn("NaN Position Detected! Resetting Player.");
-                        this.respawn(new THREE.Vector3(0, 20, 0));
+                    if (isNaN(this.mesh.position.x) || isNaN(this.mesh.position.y) || isNaN(this.mesh.position.z) ||
+                        isNaN(this.cameraAngle.x) || isNaN(this.cameraAngle.y)) {
+                        // Only log/reset during active gameplay; during killcam/end just skip
+                        if (gameMode === MODE.SOLO || gameMode === MODE.PVP) {
+                            console.warn("NaN Detected! Performing Deep Reset on Player " + this.id);
+                            this.respawn(this.spawnPos || new THREE.Vector3(0, 20, 0));
+                            this.velocity.set(0, 0, 0);
+                            this.walkCycle = 0;
+                            this.bobPhase = 0;
+                        }
                         return;
                     }
+
+                    if (isNaN(dt) || dt <= 0) return;
+
+                    // Validate velocity
+                    if (isNaN(this.velocity.x) || isNaN(this.velocity.y) || isNaN(this.velocity.z)) {
+                        this.velocity.set(0, 0, 0);
+                    }
+
+                    // Validate input values
+                    if (isNaN(this.input.x)) this.input.x = 0;
+                    if (isNaN(this.input.y)) this.input.y = 0;
 
                     // -- MOVEMENT --
                     // Yaw applies to movement frame
                     const sinY = Math.sin(this.cameraAngle.y);
                     const cosY = Math.cos(this.cameraAngle.y);
+
+                    // Validate trigonometric results
+                    if (isNaN(sinY) || isNaN(cosY)) {
+                        this.cameraAngle.y = Math.PI;
+                        return;
+                    }
+
                     const forward = new THREE.Vector3(-sinY, 0, -cosY);
                     const right = new THREE.Vector3(cosY, 0, -sinY);
 
@@ -1368,21 +2001,31 @@
                     moveDir.add(forward.clone().multiplyScalar(this.input.y));
                     moveDir.add(right.clone().multiplyScalar(this.input.x));
 
-                    if (moveDir.length() > 1) moveDir.normalize();
+                    if (moveDir.length() > 0.01) moveDir.normalize();
 
-                    // Stamina Logic
+                    // Stamina & ADS Speed Logic
                     let currentSpeed = this.moveSpeed;
                     const isMoving = moveDir.length() > 0;
 
-                    if (this.input.sprint && isMoving && this.stamina > 0) {
+                    if (this.input.aim) {
+                        currentSpeed *= 0.5; // 50% speed penalty while aiming
+                    } else if (this.input.sprint && isMoving && this.stamina > 0 && !this.isExhausted) {
                         currentSpeed *= 1.6;
                         this.stamina -= 30 * dt;
-                        if (this.stamina < 0) this.stamina = 0;
+                        if (this.stamina <= 0) {
+                            this.stamina = 0;
+                            this.isExhausted = true; // Mark as exhausted
+                        }
                     }
 
                     else {
                         this.stamina += 15 * dt;
                         if (this.stamina > this.maxStamina) this.stamina = this.maxStamina;
+
+                        // Recover from exhaustion at 20%
+                        if (this.isExhausted && this.stamina >= 20) {
+                            this.isExhausted = false;
+                        }
                     }
 
                     if (isMoving) {
@@ -1395,6 +2038,18 @@
                             if ((nextPos.x - t.x) ** 2 + (nextPos.z - t.z) ** 2 < 1.0) hit = true;
                         }
 
+                        // Stone Collision
+                        for (let s of stonePos) {
+                            const r = 1.3 * s.s; // hitbox ligeramente menor que el visual (1.5)
+                            const dx = nextPos.x - s.x;
+                            const dz = nextPos.z - s.z;
+                            if (dx * dx + dz * dz < r * r) {
+                                const stoneBaseY = getTerrainHeight(s.x, s.z);
+                                const stoneTop = stoneBaseY + 1.6 * s.s;
+                                if (this.mesh.position.y < stoneTop + 0.5) hit = true;
+                            }
+                        }
+
                         if (!hit) this.mesh.position.add(step);
 
                         // Face Camera Yaw
@@ -1404,20 +2059,20 @@
                         const walkSpeed = this.input.sprint ? 12 : 8;
                         this.walkCycle += dt * walkSpeed;
                         this.bobPhase = Math.sin(this.walkCycle) * 0.15;
-                        
+
                         // Animate arms and legs independently (alternating)
                         const swingAmount = 0.4; // Amount of swing
-                        
+
                         // Only animate if references exist (safety check)
                         if (this.armR && this.armL && this.legR && this.legL && this.body) {
                             // Right arm swings forward with left leg (natural walking)
                             this.armR.rotation.x = Math.sin(this.walkCycle) * swingAmount;
                             this.legL.rotation.x = Math.sin(this.walkCycle) * swingAmount;
-                            
-                            // Left arm swings forward with right leg
-                            this.armL.rotation.x = -Math.sin(this.walkCycle) * swingAmount;
+
+                            // Left arm (with weapon) swings forward with right leg + recoil
+                            this.armL.rotation.x = (-Math.sin(this.walkCycle) * swingAmount) - this.recoil;
                             this.legR.rotation.x = -Math.sin(this.walkCycle) * swingAmount;
-                            
+
                             // Subtle body lean
                             this.body.rotation.z = Math.cos(this.walkCycle * 0.5) * 0.02;
                         }
@@ -1425,17 +2080,33 @@
 
                     else {
                         this.mesh.rotation.y = this.cameraAngle.y + Math.PI;
-                        
+
                         // Reset animation smoothly
                         this.bobPhase *= 0.9;
-                        
+
                         // Reset limb rotations (with safety check)
                         if (this.armR && this.armL && this.legR && this.legL && this.body) {
                             this.armR.rotation.x *= 0.9;
-                            this.armL.rotation.x *= 0.9;
+                            this.armL.rotation.x = (this.armL.rotation.x * 0.9) - this.recoil;
                             this.legR.rotation.x *= 0.9;
                             this.legL.rotation.x *= 0.9;
                             this.body.rotation.z *= 0.9;
+                        }
+                    }
+
+                    // -- ANIMATION UPDATES (Recoil & Flash) --
+                    this.recoil *= 0.8; // Fast decay
+                    if (this.recoil < 0.001) this.recoil = 0;
+
+                    if (this.muzzleFlashTimer > 0) {
+                        this.muzzleFlashTimer -= dt;
+                        if (this.weaponModel && this.weaponModel.userData.muzzleFlash) {
+                            this.weaponModel.userData.muzzleFlash.visible = true;
+                            this.weaponModel.userData.muzzleFlash.scale.setScalar(0.5 + Math.random() * 1.5);
+                        }
+                    } else {
+                        if (this.weaponModel && this.weaponModel.userData.muzzleFlash) {
+                            this.weaponModel.userData.muzzleFlash.visible = false;
                         }
                     }
 
@@ -1454,8 +2125,21 @@
                     this.mesh.position.z = Math.max(-98, Math.min(98, this.mesh.position.z));
                     const h = getTerrainHeight(this.mesh.position.x, this.mesh.position.z);
 
-                    if (this.mesh.position.y < h + 1) {
-                        this.mesh.position.y = h + 1 + this.bobPhase;
+                    // Calcular si el jugador está sobre alguna piedra y usarla como suelo
+                    let floorY = h;
+                    for (let s of stonePos) {
+                        const r = 1.3 * s.s;
+                        const dx = this.mesh.position.x - s.x;
+                        const dz = this.mesh.position.z - s.z;
+                        if (dx * dx + dz * dz < r * r) {
+                            const stoneBaseY = getTerrainHeight(s.x, s.z);
+                            const stoneTop = stoneBaseY + 1.6 * s.s;
+                            if (stoneTop > floorY) floorY = stoneTop;
+                        }
+                    }
+
+                    if (this.mesh.position.y < floorY + 1) {
+                        this.mesh.position.y = floorY + 1 + this.bobPhase;
                         this.velocity.y = 0;
                         this.onGround = true;
                     }
@@ -1469,19 +2153,26 @@
                         this.hp = 0; // Die if void
                     }
 
-                    // -- ORBITAL CAMERA --
-                    // Pos = Player + SphericalOffset
-                    const camDist = 6;
+                    // -- ADS ZOOM --
+                    const zoomSpeed = 10;
+                    if (this.input.aim) {
+                        this.zoomLevel = Math.min(1, this.zoomLevel + dt * zoomSpeed);
+                    } else {
+                        this.zoomLevel = Math.max(0, this.zoomLevel - dt * zoomSpeed);
+                    }
+
+                    // FOV Zoom: 75 -> 40
+                    this.camera.fov = 75 - (this.zoomLevel * 35);
+                    this.camera.updateProjectionMatrix();
+
+                    // Orbital Camera Update
+                    // Dist: 6 -> 4 (Zoom in closer to player)
+                    const camDist = 6 - (this.zoomLevel * 2);
                     // Limit pitch to prevent flipping (e.g. -80 to +80 deg)
                     // Clamp Pitch HERE to strictly prevent accumulation
                     this.cameraAngle.x = Math.max(-1.4, Math.min(1.4, this.cameraAngle.x));
 
                     const pitch = this.cameraAngle.x;
-                    // "Behind" means opposite to angle.
-                    // We want camera to orbit. 
-                    // Y offset (Height) depends on sin(pitch).
-                    // Horiz offset depends on cos(pitch).
-
                     const cHeight = Math.sin(pitch) * camDist;
                     const cHoriz = Math.cos(pitch) * camDist;
 
@@ -1524,15 +2215,86 @@
                     if (Date.now() - this.lastTrigger < this.fireRate) return;
                     this.lastTrigger = Date.now();
 
+                    // Si el jugador (id=1) dispara dentro de un arbusto, queda expuesto 5s
+                    if (this.id === 1) {
+                        for (const b of bushPos) {
+                            const r = b.s * 1.4;
+                            const dx = this.mesh.position.x - b.x;
+                            const dz = this.mesh.position.z - b.z;
+                            if (dx * dx + dz * dz < r * r) {
+                                bushExposedUntil = Date.now() + 5000;
+                                break;
+                            }
+                        }
+                    }
+
                     this.ammo--;
 
-                    const start = this.mesh.position.clone();
-                    start.y += 1;
+                    // Trigger Visuals
+                    this.recoil = 0.15; // Reduced from 0.4
+                    this.muzzleFlashTimer = 0.05;
 
-                    const dir = new THREE.Vector3();
-                    this.camera.getWorldDirection(dir);
+                    // --- AIMING CONVERGENCE (FIXES PARALLAX) ---
+                    // 1. Raycast from camera to find what the player is looking at
+                    const raycaster = new THREE.Raycaster();
+                    const camDir = new THREE.Vector3();
+                    this.camera.getWorldDirection(camDir);
+                    raycaster.set(this.camera.position, camDir);
 
-                    spawnProjectile(start, dir, this.projSpeed, this.id, this.damage, this.projColor);
+                    // 2. Find intersection with world (ignoring the shooter themselves)
+                    const intersects = raycaster.intersectObjects(scene.children, true);
+                    let targetPoint = new THREE.Vector3();
+                    let hitPoint = null;
+
+                    for (let i = 0; i < intersects.length; i++) {
+                        // Ignore self and children of self
+                        let object = intersects[i].object;
+                        let isSelf = false;
+                        object.traverseAncestors(a => { if (a === this.mesh) isSelf = true; });
+                        if (object === this.mesh) isSelf = true;
+
+                        // Ignorar meshes de arbustos, árboles y piedras
+                        if (object.userData.isBush || object.userData.isTree || object.userData.isStone) continue;
+
+                        if (!isSelf) {
+                            hitPoint = intersects[i].point;
+                            break;
+                        }
+                    }
+
+                    if (hitPoint) {
+                        targetPoint.copy(hitPoint);
+                    } else {
+                        // If no hit, target point 100m away
+                        targetPoint.copy(camDir).multiplyScalar(100).add(this.camera.position);
+                    }
+
+                    // Start position:
+                    // Human players (id 1 or 2): use weapon barrel tip (correct in first-person)
+                    // AI bots: use head position + push forward in shoot direction to avoid
+                    //          the rotated-arm artifact that makes bullets start behind the bot
+                    const start = new THREE.Vector3();
+                    if (this.weaponModel) {
+                        const tip = this.weaponModel.userData.barrelTip.clone();
+                        this.weaponModel.localToWorld(tip);
+                        start.copy(tip);
+                    } else {
+                        // Fallback: spawn from head/eye level
+                        start.copy(this.mesh.position);
+                        start.y += 1.1;
+                    }
+
+                    // 3. Final direction from start to target
+                    const diff = targetPoint.clone().sub(start);
+                    const finalDir = diff.length() > 0.01 ? diff.normalize() : camDir;
+
+                    // For bots, push start a bit in shoot direction so it clears the body
+                    const isBot = (this.id !== 1 && this.id !== 2);
+                    if (isBot) {
+                        start.addScaledVector(finalDir, 0.7);
+                    }
+
+                    spawnProjectile(start, finalDir, this.projSpeed, this.id, this.damage, this.projColor, this.range);
 
                     if (this.ammo === 0) this.startReload();
                 }
@@ -1542,7 +2304,7 @@
                     this.reloading = true;
 
                     setTimeout(() => {
-                        this.ammo = 30;
+                        this.ammo = this.maxAmmo;
                         this.reloading = false;
                     }
 
@@ -1556,55 +2318,24 @@
             // -- ENEMIES --
             const enemies = [];
 
-            const enemySpawnPoints = [{
-                x: 40, z: 40
-            }
+            const enemySpawnPoints = [
+                // North edge
+                { x: -80, z: 90 },
+                { x: 0, z: 90 },
+                { x: 80, z: 90 },
 
-                ,
-            {
-                x: -40, z: -40
-            }
+                // East edge
+                { x: 90, z: 60 },
+                { x: 90, z: 0 },
+                { x: 90, z: -60 },
 
-                ,
-            {
-                x: 40, z: -40
-            }
+                // South edge
+                { x: 80, z: -90 },
+                { x: 0, z: -90 },
+                { x: -80, z: -90 },
 
-                ,
-            {
-                x: -40, z: 40
-            }
-
-                ,
-            {
-                x: 60, z: 0
-            }
-
-                ,
-            {
-                x: 0, z: 60
-            }
-
-                ,
-            {
-                x: -60, z: 0
-            }
-
-                ,
-            {
-                x: 50, z: 50
-            }
-
-                ,
-            {
-                x: -50, z: -50
-            }
-
-                ,
-            {
-                x: 30, z: -60
-            }
-
+                // West edge
+                { x: -90, z: 0 }
             ];
 
             class AIEnemy extends Player {
@@ -1615,7 +2346,10 @@
 
                     // Get terrain height at spawn position for proper ground placement
                     const terrainHeight = getTerrainHeight(pos.x, pos.z);
-                    super(3, 0xff0000, new THREE.Vector3(pos.x, terrainHeight + 2, pos.z), rndKey);
+                    super(3, 0xc23616, new THREE.Vector3(pos.x, terrainHeight + 2, pos.z), rndKey);
+
+                    // Store original spawn position for respawn
+                    this.spawnPos = new THREE.Vector3(pos.x, terrainHeight + 2, pos.z);
 
                     this.aggro = false;
                     this.nextMove = 0;
@@ -1642,53 +2376,75 @@
 
                 update(dt) {
                     if (this.hp <= 0) {
-                        if (this.mesh.parent) scene.remove(this.mesh);
+                        // Keep meshes in scene during killcam/end modes for visual reconstruction
+                        if (gameMode === MODE.KILLCAM || gameMode === MODE.END || kcKillerEntity === this) {
+                            if (!this.mesh.parent) scene.add(this.mesh);
+                            this.mesh.visible = true;
+                            // Still need to update camera position/rotation for killer POV screenshots
+                            super.update(0);
+                            return;
+                        }
+                        // Remove dead enemy from scene immediately otherwise
+                        if (this.mesh.parent) {
+                            scene.remove(this.mesh);
+                        }
                         return;
                     }
 
+                    // Don't update AI once game is over / during killcam
+                    if (gameEnding || gameMode === MODE.KILLCAM || gameMode === MODE.END) return;
+
                     try {
+                        // Guard against NaN in p1 position
+                        if (isNaN(p1.mesh.position.x) || isNaN(p1.mesh.position.z)) return;
+
                         const dist = this.mesh.position.distanceTo(p1.mesh.position);
+                        if (!isFinite(dist)) return;
 
-                        this.input.y = 0;
-                        this.input.x = 0;
+                        // Si el jugador está en un arbusto, el bot solo lo detecta si está muy cerca
+                        const detectionRange = isPlayerInBush() ? 8 : 100;
 
-                        if (dist < 100 || this.aggro) {
-                            // Increased Range to 100
-                            const toP = p1.mesh.position.clone().sub(this.mesh.position).normalize();
+                        if (dist < detectionRange || (this.aggro && !isPlayerInBush())) {
+                            const toPlayer = p1.mesh.position.clone().sub(this.mesh.position);
+                            const distSq = toPlayer.lengthSq();
 
-                            // Update Yaw to FACE player (add PI because model Z-forward vs atan2)
-                            this.cameraAngle.y = Math.atan2(toP.x, toP.z) + Math.PI;
+                            if (distSq > 0.0001) {
+                                const toP = toPlayer.normalize();
 
-                            // Move Logic: Strict 20m Retreat
-                            // Approach if > preferred, Retreat if < 20
+                                // Update Yaw to FACE player
+                                this.cameraAngle.y = Math.atan2(toP.x, toP.z) + Math.PI;
+
+                                // Update Pitch to AIM at player
+                                const dx = p1.mesh.position.x - this.mesh.position.x;
+                                const dz = p1.mesh.position.z - this.mesh.position.z;
+                                const hDist = Math.sqrt(dx * dx + dz * dz);
+                                const vDist = (p1.mesh.position.y + 0.4) - (this.mesh.position.y + 1.5);
+
+                                this.cameraAngle.x = -Math.atan2(vDist, Math.max(0.1, hDist));
+                            }
+
+                            // Move Logic
                             if (dist > this.preferredDist + 2) this.input.y = 1;
-                            else if (dist < 20) this.input.y = -1; // RETREAT FROM 20m!
+                            else if (dist < 20) this.input.y = -1;
 
                             if (Date.now() > this.nextMove) {
                                 this.strafe *= -1;
                                 this.nextMove = Date.now() + 1000 + Math.random() * 2000;
                                 if (Math.random() > 0.7) this.input.jump = true;
-                            }
-
-                            else {
+                            } else {
                                 this.input.jump = false;
                             }
 
                             this.input.x = this.strafe;
 
-                            if (Date.now() - this.lastShot > this.shootInterval) {
-                                this.lastShot = Date.now();
-                                // Recalc Interval for variety
-                                this.shootInterval = 1500 + Math.random() * 1000;
-
-                                // CORRECTED AIM: Source(Head) -> Target(Lower Chest)
-                                const source = this.mesh.position.clone().add(new THREE.Vector3(0, 1.5, 0));
-                                // Aim lower (0.75) to hit chest/stomach
-                                const target = p1.mesh.position.clone().add(new THREE.Vector3(0, 0.75, 0));
-                                const aimDir = target.sub(source).normalize();
-
-                                spawnProjectile(source, aimDir, this.projSpeed, 3, this.damage, this.projColor);
-                            }
+                            // SHOOTING & RELOADING
+                            this.input.shoot = (dist < detectionRange);
+                            this.input.reload = (this.ammo === 0);
+                        } else {
+                            this.input.shoot = false;
+                            this.input.reload = false;
+                            this.input.y = 0;
+                            this.input.x = 0;
                         }
 
                         super.update(dt);
@@ -1702,17 +2458,630 @@
 
             // -- PROJECTILES --
             const projectiles = [];
+            // Información de la última muerte para la cámara de replay
+            let lastKillInfo = null;
 
-            function spawnProjectile(pos, dir, speed, ownerId, damage, color) {
+            // ── REPLAY BUFFER ─────────────────────────────────────
+            // Records p1 camera state every frame; keeps last REPLAY_WINDOW seconds
+            const REPLAY_WINDOW = 2.0;
+            const replayBuffer = []; // { t, pos: Vector3, quat: Quaternion }
+            const enemyReplayBuffers = new Map(); // enemy → [{t, meshPos, meshRotY, armLx...}]
+            const projectileReplayBuffer = []; // stores projectile spawn events: {t, pos, dir, speed, ownerId, damage, color, range}
+
+            function recordReplayFrame() {
+                if (gameMode !== MODE.SOLO && gameMode !== MODE.PVP) return;
+                const now = performance.now() / 1000;
+                const frame = {
+                    t: now,
+                    // P1
+                    pos: p1.camera.position.clone(),
+                    quat: p1.camera.quaternion.clone(),
+                    meshPos: p1.mesh.position.clone(),
+                    meshRotY: p1.mesh.rotation.y,
+                    armLx: p1.armL.rotation.x,
+                    armRx: p1.armR.rotation.x,
+                    legLx: p1.legL.rotation.x,
+                    legRx: p1.legR.rotation.x,
+                };
+                // P2 (only in PvP)
+                if (gameMode === MODE.PVP && p2.mesh.parent) {
+                    frame.p2meshPos = p2.mesh.position.clone();
+                    frame.p2meshRotY = p2.mesh.rotation.y;
+                    frame.p2armLx = p2.armL.rotation.x;
+                    frame.p2armRx = p2.armR.rotation.x;
+                    frame.p2legLx = p2.legL.rotation.x;
+                    frame.p2legRx = p2.legR.rotation.x;
+                }
+                replayBuffer.push(frame);
+                const cutoff = now - REPLAY_WINDOW;
+                while (replayBuffer.length > 0 && replayBuffer[0].t < cutoff) replayBuffer.shift();
+
+                // Record each living enemy
+                for (const e of enemies) {
+                    if (e.hp <= 0) continue;
+                    if (!enemyReplayBuffers.has(e)) enemyReplayBuffers.set(e, []);
+                    const buf = enemyReplayBuffers.get(e);
+                    buf.push({
+                        t: now,
+                        meshPos: e.mesh.position.clone(),
+                        meshRotY: e.mesh.rotation.y,
+                        armLx: e.armL.rotation.x,
+                        armRx: e.armR.rotation.x,
+                        legLx: e.legL.rotation.x,
+                        legRx: e.legR.rotation.x,
+                        // Build a chase-cam position: behind the enemy
+                        camPos: e.camera.position.clone(),
+                        camQuat: e.camera.quaternion.clone(),
+                    });
+                    while (buf.length > 0 && buf[0].t < cutoff) buf.shift();
+                }
+
+                // Prune projectile buffer
+                while (projectileReplayBuffer.length > 0 && projectileReplayBuffer[0].t < cutoff) {
+                    projectileReplayBuffer.shift();
+                }
+            }
+
+            function snapshotReplay() {
+                return replayBuffer.map(f => ({
+                    t: f.t,
+                    pos: f.pos.clone(),
+                    quat: f.quat.clone(),
+                    meshPos: f.meshPos.clone(),
+                    meshRotY: f.meshRotY,
+                    armLx: f.armLx,
+                    armRx: f.armRx,
+                    legLx: f.legLx,
+                    legRx: f.legRx,
+                    // P2
+                    p2meshPos: f.p2meshPos ? f.p2meshPos.clone() : null,
+                    p2meshRotY: f.p2meshRotY ?? null,
+                    p2armLx: f.p2armLx ?? null,
+                    p2armRx: f.p2armRx ?? null,
+                    p2legLx: f.p2legLx ?? null,
+                    p2legRx: f.p2legRx ?? null,
+                }));
+            }
+
+            function snapshotAllEnemyReplays() {
+                const snapshots = new Map();
+                for (const [enemy, buffer] of enemyReplayBuffers) {
+                    snapshots.set(enemy, buffer.map(f => ({
+                        t: f.t,
+                        meshPos: f.meshPos.clone(),
+                        meshRotY: f.meshRotY,
+                        armLx: f.armLx, armRx: f.armRx,
+                        legLx: f.legLx, legRx: f.legRx,
+                        camPos: f.camPos.clone(),
+                        camQuat: f.camQuat.clone(),
+                    })));
+                }
+                return snapshots;
+            }
+
+            // ── KILLCAM ──────────────────────────────────────────────
+            // 4 seconds total:
+            //   Phase 1 (0-2s): Killer's POV – camera locked at killer cam position,
+            //                   bullet travels from killerPos → victimPos at cinematic speed.
+            //   Phase 2 (2-4s): Bullet cam – camera follows bullet in slow-mo to impact.
+            let KC_DURATION = 4000;   // ms total — recalculado en cada killcam
+            let KC_PHASE2 = 2000;     // ms donde empieza la fase 2 — recalculado en cada killcam
+            const KC_SLOWMO = 0.25;   // factor de cámara lenta
+
+            const killcamCamera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+            let kcActive = false;
+            let kcSlowmoActive = false;  // true durante toda la killcam, false al terminar
+            let kcImpacted = false;      // true desde que la bala principal impacta al objetivo
+            let kcStartTime = 0;
+            let kcCallback = null;
+
+            // Bullet state (shared between phases)
+            let kcBulletMesh = null;
+            let kcBulletPos = null;
+            let kcBulletDir = null;
+            let kcBulletSpeed = 0;
+            let kcKillerOrigin = null;
+            let kcKillerCamPos = null;
+            let kcVictimPos = null;
+            let kcProjSpawnTime = 0;
+            let kcBulletAppearElapsed = null; // ms de elapsed cuando la bala se hace visible por primera vez
+
+            // Replay playback state
+            let kcReplayFrames = null;   // array of { t, pos, quat }
+            let kcReplayStart = 0;      // replay[0].t mapped to kcStartTime
+            let kcMasterReplay = null;   // snapshot of the global replayBuffer (P1/P2)
+            let kcKillerEntity = null;   // the Player/AIEnemy object that made the kill
+            let kcKillerOwner = 0;      // owner id of the killer (1, 2, or 3 for AI)
+            let kcReplayProjectiles = []; // snapshots of projectiles to spawn during Phase 1
+            let kcAllEnemyReplays = null; // Map of enemy -> snapshots
+
+            // DOM refs
+            const kcOverlay = document.getElementById('killcam-overlay');
+            const kcBarTop = document.getElementById('killcam-bar-top');
+            const kcBarBot = document.getElementById('killcam-bar-bottom');
+            const kcLabel = document.getElementById('killcam-label');
+            const kcSlowmo = document.getElementById('killcam-slowmo-label');
+            const kcTimerBar = document.getElementById('killcam-timer-bar');
+            const kcTimerFill = document.getElementById('killcam-timer-fill');
+            const kcColorGrade = document.getElementById('killcam-colorgrade');
+            const kcImpact = document.getElementById('killcam-impact-flash');
+
+            function startKillcam(onDone) {
+                if (!lastKillInfo) { onDone(); return; }
+
+                const info = lastKillInfo;
+                kcCallback = onDone;
+                kcStartTime = performance.now();
+                kcActive = true;
+                kcSlowmoActive = true;
+                kcImpacted = false;
+
+                // ── Positions ──
+                // killerPos = weapon origin (shot was fired from here)
+                const kp = info.killerPos.clone();
+                // Use the actual bullet impact point if available, otherwise fall back to torso
+                const vp = info.hitPos
+                    ? info.hitPos.clone()
+                    : info.victimPos.clone().add(new THREE.Vector3(0, 0.8, 0));
+                kcVictimPos = vp;
+
+                // Direction from killer to victim
+                const raw = vp.clone().sub(kp);
+                const dist = raw.length();
+                kcBulletDir = dist > 0.01 ? raw.clone().normalize() : new THREE.Vector3(0, 0, 1);
+
+                // Bullet starts exactly at the killer position
+                kcBulletPos = kp.clone();
+                kcKillerOrigin = kp.clone(); // frozen start for time-based position calc
+
+                // Velocidad real del proyectil escalada al factor slow-mo — siempre fija
+                const realSpeed = info.projSpeed || 30;
+                kcBulletSpeed = realSpeed * KC_SLOWMO;
+
+                // ── Duración dinámica ──
+                // La bala viaja a kcBulletSpeed. Necesitamos saber en qué momento del timeline
+                // de la killcam aparece la bala, para que KC_PHASE2 coincida exactamente con el impacto.
+                //
+                // Durante la fase 1:  replayProgress = elapsed / KC_PHASE2  →  0..1
+                // La bala aparece cuando replayProgress = bulletFireOffset / replayDuration
+                // es decir:  appearElapsed = (bulletFireOffset / replayDuration) * KC_PHASE2
+                //
+                // Después de aparecer, la bala tarda travelSec en llegar al objetivo:
+                //   KC_PHASE2 = appearElapsed + travelSec * 1000
+                //   KC_PHASE2 = (ratio * KC_PHASE2) + travelSec * 1000
+                //   KC_PHASE2 * (1 - ratio) = travelSec * 1000
+                //   KC_PHASE2 = travelSec * 1000 / (1 - ratio)
+                //
+                // KC_DURATION = KC_PHASE2 + 1000ms  (1 segundo fijo post-impacto)
+
+                const travelSec = dist / kcBulletSpeed;
+
+                const replayFramesForTiming = info.killerReplay || info.killerEnemyReplay || null;
+                let ratio = 0; // proporción del replay transcurrida cuando se disparó la bala
+                if (replayFramesForTiming && replayFramesForTiming.length > 1 && info.projSpawnTime) {
+                    const rDur = replayFramesForTiming[replayFramesForTiming.length - 1].t
+                                 - replayFramesForTiming[0].t;
+                    const fireOffset = info.projSpawnTime - replayFramesForTiming[0].t;
+                    ratio = rDur > 0 ? Math.min(0.99, Math.max(0, fireOffset / rDur)) : 0;
+                }
+
+                KC_PHASE2 = Math.max(500, Math.round((travelSec * 1000) / (1 - ratio)));
+                KC_DURATION = KC_PHASE2 + 1000; // 1 segundo fijo después del impacto
+
+                // ── Bullet visual ──
+                if (kcBulletMesh) { scene.remove(kcBulletMesh); kcBulletMesh = null; }
+                kcBulletAppearElapsed = null;
+                const bMat = new THREE.MeshBasicMaterial({ color: info.projColor || 0xffff00 });
+                kcBulletMesh = new THREE.Mesh(new THREE.SphereGeometry(0.32, 8, 8), bMat);
+                kcBulletMesh.position.copy(kcBulletPos);
+                kcBulletMesh.visible = false;  // oculta hasta que replayT alcance el momento del disparo
+                scene.add(kcBulletMesh);
+
+                // Timestamp real del disparo dentro del buffer de replay
+                kcProjSpawnTime = info.projSpawnTime || 0;
+
+                // ── Phase 1: load replay buffer ──
+                // Resolve which entity is the killer so we show the right mesh
+                const killerOwner = info.killerOwner;
+                kcKillerOwner = killerOwner;
+                if (killerOwner === 1) {
+                    kcKillerEntity = p1;
+                } else if (killerOwner === 2) {
+                    kcKillerEntity = p2;
+                } else {
+                    // AI enemy: find closest living (or recently dead) enemy to the shot origin
+                    let best = null, bestDist = Infinity;
+                    for (const en of enemies) {
+                        const d = en.mesh.position.distanceTo(kp);
+                        if (d < bestDist) { bestDist = d; best = en; }
+                    }
+                    kcKillerEntity = best; // may be null if no enemies
+                }
+
+                // kcMasterReplay is the last 2s of the global world (P1/P2)
+                kcMasterReplay = (info.killerReplay && info.killerReplay.length > 0)
+                    ? info.killerReplay : null;
+
+                // kcReplayFrames is specifically for the killer (human or AI) to drive the camera logic
+                kcReplayFrames = (kcKillerOwner === 1 || kcKillerOwner === 2)
+                    ? kcMasterReplay
+                    : (info.killerEnemyReplay && info.killerEnemyReplay.length > 0 ? info.killerEnemyReplay : null);
+
+                // Fijar el asesino en su posición del momento del kill (último frame del replay)
+                // para que la bala salga desde donde se ve el arma, sin desfase temporal.
+                if (kcKillerEntity && kcReplayFrames && kcReplayFrames.length > 0) {
+                    const lastFrame = kcReplayFrames[kcReplayFrames.length - 1];
+                    const pos  = lastFrame.meshPos || lastFrame.pos;
+                    const rotY = lastFrame.meshRotY;
+                    if (pos)  kcKillerEntity.mesh.position.copy(pos);
+                    if (rotY !== undefined) kcKillerEntity.mesh.rotation.y = rotY;
+                    if (lastFrame.armLx !== undefined) kcKillerEntity.armL.rotation.x = lastFrame.armLx;
+                    if (lastFrame.armRx !== undefined) kcKillerEntity.armR.rotation.x = lastFrame.armRx;
+                }
+
+                // Map replay time: replay[0].t → kcStartTime (ms)
+                if (kcReplayFrames) {
+                    kcReplayStart = kcReplayFrames[0].t;
+                    // AI frames use camPos/camQuat; player frames use pos/quat
+                    const f0 = kcReplayFrames[0];
+                    const initPos = f0.pos || f0.camPos;
+                    const initQuat = f0.quat || f0.camQuat;
+                    if (initPos) killcamCamera.position.copy(initPos);
+                    if (initQuat) killcamCamera.quaternion.copy(initQuat);
+                } else {
+                    // Fallback: use saved static cam pos/quat
+                    if (info.killerCamPos) kcKillerCamPos = info.killerCamPos.clone();
+                    else kcKillerCamPos = kp.clone().add(new THREE.Vector3(0, 2, 0));
+                    killcamCamera.position.copy(kcKillerCamPos);
+                    if (info.killerCamQuat) killcamCamera.quaternion.copy(info.killerCamQuat);
+                    else killcamCamera.lookAt(vp);
+                }
+                killcamCamera.fov = 70;
+                killcamCamera.aspect = window.innerWidth / window.innerHeight;
+                killcamCamera.updateProjectionMatrix();
+
+                // ── Projectile Replay ──
+                kcReplayProjectiles = projectileReplayBuffer.map(p => ({ ...p, spawned: false }));
+                kcAllEnemyReplays = info.allEnemyReplays || null;
+
+                // ── UI ──
+                kcOverlay.style.display = 'block';
+                kcColorGrade.style.opacity = '0';
+                kcImpact.style.opacity = '0';
+                // COD2: thin bars snap in fast
+                setTimeout(() => { kcBarTop.style.height = '52px'; kcBarBot.style.height = '52px'; }, 10);
+                // Sepia and label appear with the bars
+                setTimeout(() => {
+                    kcColorGrade.style.opacity = '1';
+                    kcLabel.style.opacity = '1';
+                }, 120);
+
+                // ── FORZAR VISIBILIDAD SOLO DEL ENEMIGO VÍCTIMA ──
+                // Solo re-añadimos y hacemos visible al enemigo que acaba de morir (victimEnemyRef).
+                // Los enemigos eliminados anteriormente deben seguir ocultos/fuera de escena.
+                if (info.victimEnemyRef) {
+                    const ve = info.victimEnemyRef;
+                    if (!ve.mesh.parent) scene.add(ve.mesh);
+                    ve.mesh.visible = true;
+                    ve.mesh.traverse(child => { if (child.isMesh) child.visible = true; });
+                }
+
+                gameMode = MODE.KILLCAM;
+            }
+
+            function updateKillcam(now) {
+                if (!kcActive || !kcBulletPos) return;
+
+                const elapsed = now - kcStartTime;
+                const t = Math.min(elapsed / KC_DURATION, 1);
+
+                // Timer bar shrinks
+                kcTimerFill.style.transform = `scaleX(${1 - t})`;
+
+                // ── Slow-Mo Time Mapping ──
+                let replayProgress;
+                if (elapsed < KC_PHASE2) {
+                    replayProgress = elapsed / KC_PHASE2;  // 0→1 durante la fase 1
+                } else {
+                    replayProgress = 1.0;                  // congelado en el momento del kill durante fase 2
+                }
+
+                const replayDuration = (kcMasterReplay && kcMasterReplay.length > 1)
+                    ? (kcMasterReplay[kcMasterReplay.length - 1].t - kcMasterReplay[0].t)
+                    : 2.0;
+                const replayT = (kcMasterReplay && kcMasterReplay.length > 0)
+                    ? (kcMasterReplay[0].t + replayProgress * replayDuration)
+                    : (performance.now() / 1000);
+
+                // ── Bullet position ──
+                // La bala permanece oculta hasta que el replay alcanza el momento real del disparo.
+                // Una vez visible, avanza con su tiempo propio (elapsed desde que apareció),
+                // independiente de replayT — así no se congela en fase 2.
+                if (kcProjSpawnTime > 0 && replayT < kcProjSpawnTime) {
+                    // Disparo aún no ha ocurrido en el replay
+                    kcBulletMesh.visible = false;
+                    kcBulletPos.copy(kcKillerOrigin);
+                    kcBulletAppearElapsed = null;
+                } else {
+                    // Primera vez que aparece: guardar el elapsed en ese momento
+                    if (kcBulletAppearElapsed === null) kcBulletAppearElapsed = elapsed;
+                    kcBulletMesh.visible = true;
+                    // Avanzar en tiempo real de killcam desde que apareció
+                    const bulletSec = (elapsed - kcBulletAppearElapsed) / 1000;
+                    const distTravelled = kcBulletSpeed * bulletSec;
+                    kcBulletPos.copy(kcKillerOrigin).addScaledVector(kcBulletDir, distTravelled);
+                    // Clamp: nunca pasar al objetivo
+                    if (kcBulletPos.clone().sub(kcKillerOrigin).dot(kcBulletDir) >=
+                        kcVictimPos.clone().sub(kcKillerOrigin).dot(kcBulletDir)) {
+                        kcBulletPos.copy(kcVictimPos);
+                        kcImpacted = true;  // la bala ha llegado — congelar las demás
+                    }
+                }
+                kcBulletMesh.position.copy(kcBulletPos);
+
+                // ── Ensuring Visibility ──
+                p1.mesh.visible = true;
+                if (p2 && p2.mesh) p2.mesh.visible = true;
+                // Mantener visible SOLO el enemigo víctima (el recién eliminado).
+                // Los enemigos muertos anteriormente no deben reaparecer.
+                if (lastKillInfo && lastKillInfo.victimEnemyRef) {
+                    const ve = lastKillInfo.victimEnemyRef;
+                    if (!ve.mesh.parent) scene.add(ve.mesh);
+                    ve.mesh.visible = true;
+                    ve.mesh.traverse(child => { if (child.isMesh) child.visible = true; });
+                }
+
+                // ── REPLAY ALL ENTITIES (Always active, synchronized with replayT) ──
+                if (kcMasterReplay && kcMasterReplay.length > 1) {
+                    let snapIdx = 0;
+                    for (let j = 0; j < kcMasterReplay.length - 1; j++) {
+                        if (kcMasterReplay[j + 1].t >= replayT) { snapIdx = j; break; }
+                    }
+                    const fa = kcMasterReplay[snapIdx];
+                    const fb = kcMasterReplay[snapIdx + 1];
+                    const span = fb.t - fa.t;
+                    const alpha = span > 0.00001 ? (replayT - fa.t) / span : 1;
+
+                    // Replay P1
+                    p1.mesh.position.lerpVectors(fa.meshPos, fb.meshPos, alpha);
+                    p1.mesh.rotation.y = fa.meshRotY + (fb.meshRotY - fa.meshRotY) * alpha;
+                    p1.armL.rotation.x = fa.armLx + (fb.armLx - fa.armLx) * alpha;
+                    p1.armR.rotation.x = fa.armRx + (fb.armRx - fa.armRx) * alpha;
+                    p1.legL.rotation.x = fa.legLx + (fb.legLx - fa.legLx) * alpha;
+                    p1.legR.rotation.x = fa.legRx + (fb.legRx - fa.legRx) * alpha;
+
+                    // Replay P2 (if exists in snapshot)
+                    if (fa.p2meshPos && fb.p2meshPos) {
+                        p2.mesh.position.lerpVectors(fa.p2meshPos, fb.p2meshPos, alpha);
+                        p2.mesh.rotation.y = fa.p2meshRotY + (fb.p2meshRotY - fa.p2meshRotY) * alpha;
+                        p2.armL.rotation.x = fa.p2armLx + (fb.p2armLx - fa.p2armLx) * alpha;
+                        p2.armR.rotation.x = fa.p2armRx + (fb.p2armRx - fa.p2armRx) * alpha;
+                        p2.legL.rotation.x = fa.p2legLx + (fb.p2legLx - fa.p2legLx) * alpha;
+                        p2.legR.rotation.x = fa.p2legRx + (fb.p2legRx - fa.p2legRx) * alpha;
+                    }
+                }
+
+                // Replay All AI Enemies from individual snapshots
+                if (kcAllEnemyReplays) {
+                    for (const [enemy, buf] of kcAllEnemyReplays) {
+                        if (buf.length < 2) continue;
+                        let eIdx = 0;
+                        for (let j = 0; j < buf.length - 1; j++) {
+                            if (buf[j + 1].t >= replayT) { eIdx = j; break; }
+                        }
+                        const efa = buf[eIdx];
+                        const efb = buf[eIdx + 1];
+                        const eSpan = efb.t - efa.t;
+                        const eAlpha = eSpan > 0.00001 ? (replayT - efa.t) / eSpan : 1;
+
+                        enemy.mesh.position.lerpVectors(efa.meshPos, efb.meshPos, eAlpha);
+                        enemy.mesh.rotation.y = efa.meshRotY + (efb.meshRotY - efa.meshRotY) * eAlpha;
+                        enemy.armL.rotation.x = efa.armLx + (efb.armLx - efa.armLx) * eAlpha;
+                        enemy.armR.rotation.x = efa.armRx + (efb.armRx - efa.armRx) * eAlpha;
+                        enemy.legL.rotation.x = efa.legLx + (efb.legLx - efa.legLx) * eAlpha;
+                        enemy.legR.rotation.x = efa.legRx + (efb.legRx - efa.legRx) * eAlpha;
+                    }
+                }
+
+                // Replay projectile spawns at their original timestamps
+                for (const rp of kcReplayProjectiles) {
+                    if (!rp.spawned && replayT >= rp.t) {
+                        rp.spawned = true;
+                        const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.3), new THREE.MeshBasicMaterial({
+                            color: rp.color || 0xffff00
+                        }));
+                        mesh.position.copy(rp.pos);
+                        scene.add(mesh);
+                        projectiles.push({
+                            mesh,
+                            vel: rp.dir.clone().multiplyScalar(rp.speed),
+                            life: rp.range / rp.speed,
+                            owner: rp.ownerId,
+                            damage: rp.damage,
+                            origin: rp.pos.clone()
+                        });
+                    }
+                }
+
+                // ── CAMERA / PHASE LOGIC ──
+                // Mientras la bala no se ha disparado: cámara detrás del asesino
+                // En cuanto la bala aparece: cámara sigue la bala hasta el impacto y 1s después
+                const bulletVisible = kcBulletAppearElapsed !== null;
+
+                if (!bulletVisible) {
+                    // Pre-disparo: cámara detrás del asesino
+                    killcamCamera.fov = 70;
+                    killcamCamera.updateProjectionMatrix();
+                    let killer = kcKillerEntity;
+                    if (killer && killer.mesh) {
+                        const bodyPos = killer.mesh.position.clone().add(new THREE.Vector3(0, 0.8, 0));
+                        const facingY = killer.mesh.rotation.y;
+                        const chasePos = bodyPos.clone()
+                            .addScaledVector(new THREE.Vector3(Math.sin(facingY), 0, Math.cos(facingY)), -6)
+                            .add(new THREE.Vector3(0, 2.5, 0));
+                        killcamCamera.position.copy(chasePos);
+                        killcamCamera.lookAt(kcVictimPos);
+                    } else {
+                        if (kcKillerCamPos) killcamCamera.position.copy(kcKillerCamPos);
+                        killcamCamera.lookAt(kcVictimPos);
+                    }
+                } else {
+                    // Post-disparo: cámara sigue la bala
+                    if (!killcamCamera._phase2started) {
+                        killcamCamera._phase2started = true;
+                        killcamCamera.fov = 58;
+                        killcamCamera.updateProjectionMatrix();
+                    }
+
+                    // Cámara: 4 unidades detrás de la bala, 1 arriba
+                    // El lerp se escala con KC_SLOWMO para que la cámara también se mueva en cámara lenta
+                    const behind = kcBulletDir.clone().negate().multiplyScalar(4);
+                    const targetCamPos = kcBulletPos.clone().add(behind).add(new THREE.Vector3(0, 1, 0));
+                    const camLerpFactor = kcSlowmoActive ? 0.18 * KC_SLOWMO : 0.18;
+                    killcamCamera.position.lerp(targetCamPos, camLerpFactor);
+                    killcamCamera.lookAt(kcVictimPos);
+
+                    // FOV se cierra al acercarse al objetivo (también en slowmo)
+                    const distToVic = kcBulletPos.distanceTo(kcVictimPos);
+                    const fovGoal = Math.max(34, 58 - (1 - Math.min(distToVic / 15, 1)) * 24);
+                    const fovLerpFactor = kcSlowmoActive ? 0.08 * KC_SLOWMO : 0.08;
+                    killcamCamera.fov += (fovGoal - killcamCamera.fov) * fovLerpFactor;
+                    killcamCamera.updateProjectionMatrix();
+
+                    // Shake cerca del impacto
+                    if (elapsed >= KC_PHASE2 - 100) {
+                        killcamCamera.position.add(new THREE.Vector3(
+                            (Math.random() - 0.5) * 0.1,
+                            (Math.random() - 0.5) * 0.1,
+                            (Math.random() - 0.5) * 0.1
+                        ));
+                    }
+
+                    // Flash blanco en el impacto
+                    if (distToVic < 2.5) {
+                        kcImpact.style.opacity = String(((2.5 - distToVic) / 2.5 * 0.5).toFixed(2));
+                    }
+                }
+
+                if (t >= 1) endKillcam();
+            }
+
+            function endKillcam() {
+                kcActive = false;
+                kcSlowmoActive = false;  // slowmo se desactiva al terminar la killcam
+                kcImpacted = false;
+                kcKillerOrigin = null;
+                kcReplayFrames = null;
+                kcKillerEntity = null;
+                kcKillerOwner = 0;
+                kcProjSpawnTime = 0;
+                kcBulletAppearElapsed = null;
+                killcamCamera._phase2started = false;
+                if (kcBulletMesh) { scene.remove(kcBulletMesh); kcBulletMesh = null; }
+                kcOverlay.style.display = 'none';
+                kcBarTop.style.height = '0';
+                kcBarBot.style.height = '0';
+                kcLabel.style.opacity = '0';
+                kcSlowmo.style.opacity = '0';
+                kcTimerBar.style.opacity = '0';
+                kcColorGrade.style.opacity = '0';
+                kcImpact.style.opacity = '0';
+                killcamCamera.fov = 70;
+                killcamCamera.updateProjectionMatrix();
+                if (kcCallback) { kcCallback(); kcCallback = null; }
+            }
+
+            function spawnLobbyBots() {
+                // Clear existing lobby bots
+                lobbyBots.forEach(bot => {
+                    if (bot.mesh.parent) scene.remove(bot.mesh);
+                });
+                lobbyBots.length = 0;
+
+                const botConfigs = [
+                    // 5 RED BOT ENEMIES (Left side, spread out)
+                    { pos: new THREE.Vector3(-15, 0, -10), color: 0xff0000, weapon: 'sniper', pose: 'aim' },
+                    { pos: new THREE.Vector3(-18, 0, -5), color: 0xff0000, weapon: 'ar', pose: 'hold' },
+                    { pos: new THREE.Vector3(-14, 0, 0), color: 0xff0000, weapon: 'shotgun', pose: 'ready' },
+                    { pos: new THREE.Vector3(-20, 0, 5), color: 0xff0000, weapon: 'smg', pose: 'hold' },
+                    { pos: new THREE.Vector3(-16, 0, 10), color: 0xff0000, weapon: 'pistol', pose: 'aim' },
+                    // RIGHT SIDE BOTS (Blue P1 and Pink P2)
+                    { pos: new THREE.Vector3(15, 0, -5), color: 0x00ccff, weapon: 'ar', pose: 'ready' },
+                    { pos: new THREE.Vector3(18, 0, 5), color: 0xff00ff, weapon: 'smg', pose: 'hold' }
+                ];
+
+                // Ensure game players are NOT in scene during lobby
+                if (p1.mesh.parent) scene.remove(p1.mesh);
+                if (p2.mesh.parent) scene.remove(p2.mesh);
+
+                botConfigs.forEach(cfg => {
+                    const h = getTerrainHeight(cfg.pos.x, cfg.pos.z);
+                    cfg.pos.y = h + 1;
+                    const bot = new Player(99, cfg.color, cfg.pos, cfg.weapon);
+
+                    // Face center/path
+                    bot.mesh.rotation.y = cfg.pos.x < 0 ? Math.PI / 2 : -Math.PI / 2;
+
+                    // Apply Poses
+                    if (cfg.pose === 'aim') {
+                        bot.armL.rotation.x = -1.2;
+                        bot.armR.rotation.x = -1.0;
+                    } else if (cfg.pose === 'ready') {
+                        bot.armL.rotation.x = -0.5;
+                        bot.armR.rotation.x = -0.5;
+                        bot.legL.rotation.x = 0.2;
+                    } else if (cfg.pose === 'hold') {
+                        bot.armL.rotation.x = -0.3;
+                        bot.armR.rotation.x = 0.3;
+                    }
+
+                    lobbyBots.push(bot);
+                });
+            }
+
+            function clearLobbyBots() {
+                lobbyBots.forEach(bot => {
+                    if (bot.mesh.parent) scene.remove(bot.mesh);
+                });
+                lobbyBots.length = 0;
+            }
+
+            // Alias para compatibilidad con código que usa clearMenuBots
+            window.clearMenuBots = clearLobbyBots;
+
+            function spawnProjectile(pos, dir, speed, ownerId, damage, color, range = 100) {
                 const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.3), new THREE.MeshBasicMaterial({
                     color: color || 0xffff00
                 }));
                 mesh.position.copy(pos);
                 scene.add(mesh);
 
+                if (dir.length() > 0.01) dir.normalize();
+                else dir.set(0, 0, 1);
+
                 projectiles.push({
-                    mesh, vel: dir.normalize().multiplyScalar(speed), life: 2.0, owner: ownerId, damage: damage
+                    mesh,
+                    vel: dir.multiplyScalar(speed),
+                    life: range / speed,
+                    owner: ownerId,
+                    damage: damage,
+                    origin: pos.clone(), // Guardamos el origen del disparo para la cámara
+                    spawnTime: performance.now() / 1000  // timestamp real del disparo
                 });
+
+                // Record for replay
+                if (gameMode === MODE.SOLO || gameMode === MODE.PVP) {
+                    projectileReplayBuffer.push({
+                        t: performance.now() / 1000,
+                        pos: pos.clone(),
+                        dir: dir.clone().normalize(),
+                        speed: speed,
+                        ownerId: ownerId,
+                        damage: damage,
+                        color: color,
+                        range: range
+                    });
+                }
             }
 
             // -- INPUT --
@@ -1736,8 +3105,10 @@
                     const my = e.movementY || 0;
                     if (Math.abs(mx) > 500 || Math.abs(my) > 500) return; // Ignore jumps
 
-                    p1.cameraAngle.y -= mx * 0.002;
-                    p1.cameraAngle.x += my * 0.002;
+                    // Sensitivity reduction based on zoom (sense from 100% to 40%)
+                    const senseMult = 1.0 - (p1.zoomLevel * 0.6);
+                    p1.cameraAngle.y -= mx * 0.002 * senseMult;
+                    p1.cameraAngle.x += my * 0.002 * senseMult;
 
                     // Safety Clamp
                     if (isNaN(p1.cameraAngle.x)) p1.cameraAngle.x = 0;
@@ -1752,9 +3123,17 @@
                 if (gameMode === MODE.MENU || gameMode === MODE.PVP_SELECT || gameMode === MODE.END) return;
 
                 if (document.pointerLockElement !== document.body) document.body.requestPointerLock();
-                else p1.input.shoot = true;
+                else {
+                    if (e.button === 0) p1.input.shoot = true;
+                    if (e.button === 2) p1.input.aim = true;
+                }
             });
-            document.body.addEventListener('mouseup', () => p1.input.shoot = false);
+            document.body.addEventListener('mouseup', (e) => {
+                if (e.button === 0) p1.input.shoot = false;
+                if (e.button === 2) p1.input.aim = false;
+            });
+            // Disable context menu for right click aim
+            window.addEventListener('contextmenu', e => e.preventDefault());
 
             function updateInput() {
                 // Prevent Input in Menus
@@ -1788,7 +3167,8 @@
                     p2Jump = false,
                     p2Shoot = false,
                     p2Reload = false,
-                    p2Sprint = false;
+                    p2Sprint = false,
+                    p2Aim = false;
 
                 // Keyboard Fallback
                 p2MoveX = (keys['ArrowRight'] ? 1 : 0) - (keys['ArrowLeft'] ? 1 : 0);
@@ -1811,8 +3191,15 @@
                     if (gp.axes && gp.axes.length > 3) {
                         const lookX = Math.abs(gp.axes[2]) > deadzone ? gp.axes[2] : 0;
                         const lookY = Math.abs(gp.axes[3]) > deadzone ? gp.axes[3] : 0;
-                        p2.cameraAngle.y -= lookX * 0.05;
-                        p2.cameraAngle.x += lookY * 0.05;
+
+                        // Gamepad sensitivity scaling
+                        const gpSenseMult = 1.0 - (p2.zoomLevel * 0.6);
+                        p2.cameraAngle.y -= lookX * 0.05 * gpSenseMult;
+                        p2.cameraAngle.x += lookY * 0.05 * gpSenseMult;
+
+                        // NaN Guard for Gamepad
+                        if (isNaN(p2.cameraAngle.x)) p2.cameraAngle.x = 0;
+                        if (isNaN(p2.cameraAngle.y)) p2.cameraAngle.y = Math.PI;
                     }
 
                     // Clamp P2 IMMEDIATELY
@@ -1824,6 +3211,7 @@
                     if (gp.buttons && gp.buttons.length > 10) {
                         if (gp.buttons[0].pressed) p2Jump = true;
                         if (gp.buttons[2].pressed) p2Reload = true;
+                        if (gp.buttons[6] && gp.buttons[6].value > 0.5) p2Aim = true; // L2 Aim
                         if (gp.buttons[7] && gp.buttons[7].value > 0.5) p2Shoot = true;
                         if (gp.buttons[10].pressed) p2Sprint = true; // L3 Sprint
                     }
@@ -1835,6 +3223,7 @@
                 p2.input.shoot = p2Shoot;
                 p2.input.reload = p2Reload;
                 p2.input.sprint = p2Sprint;
+                p2.input.aim = p2Aim;
             }
 
             // ... Collisions & Loop ...
@@ -1875,6 +3264,23 @@
                         }
                     }
 
+                    // Vs Stones
+                    if (!hitTree) {
+                        for (let s of stonePos) {
+                            const stoneBaseY = getTerrainHeight(s.x, s.z);
+                            const dx = p.mesh.position.x - s.x;
+                            const dz = p.mesh.position.z - s.z;
+                            const r = 1.3 * s.s; // hitbox ligeramente menor que el visual
+
+                            if (dx * dx + dz * dz < r * r) {
+                                if (p.mesh.position.y > stoneBaseY - 1 && p.mesh.position.y < stoneBaseY + 1.6 * s.s) {
+                                    hitTree = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     if (hitTree) {
                         scene.remove(p.mesh);
                         projectiles.splice(i, 1);
@@ -1883,20 +3289,52 @@
 
                     // Collision
                     let hit = null;
-                    // Check Players
-                    if (p.owner !== 1 && p.mesh.position.distanceTo(p1.mesh.position) < 1) hit = p1;
-                    if (gameMode === MODE.PVP && p.owner !== 2 && p.mesh.position.distanceTo(p2.mesh.position) < 1) hit = p2;
+                    // Check Players — only register hit if p1 is alive, otherwise just remove bullet
+                    if (p.owner !== 1 && p.mesh.position.distanceTo(p1.mesh.position) < 1) {
+                        hit = p1.hp > 0 ? p1 : '__dead_p1__';
+                    }
+                    if (p2 && p2.mesh.parent && (gameMode === MODE.PVP || gameMode === MODE.KILLCAM) && p.owner !== 2 && p.mesh.position.distanceTo(p2.mesh.position) < 1) {
+                        hit = p2.hp > 0 ? p2 : '__dead_p2__';
+                    }
 
-                    if (gameMode === MODE.SOLO && p.owner === 1) {
+                    // Remove bullet immediately if it hit a dead player (no extra damage, no pass-through)
+                    if (hit === '__dead_p1__' || hit === '__dead_p2__') {
+                        scene.remove(p.mesh);
+                        projectiles.splice(i, 1);
+                        continue;
+                    }
 
-                        // Player shot enemy
+                    if ((gameMode === MODE.SOLO || gameMode === MODE.KILLCAM) && p.owner === 1) {
+
+                        // Player shot enemy — check alive AND dead bodies (no pass-through during killcam)
                         for (let e of enemies) {
-                            if (e.hp > 0 && p.mesh.position.distanceTo(e.mesh.position) < 1) {
-                                e.takeDamage(p.damage); // Use Projectile Damage
-                                if (e.hp <= 0) e.hp = 0;
-                                hit = e;
+                            const checkHp = gameMode === MODE.KILLCAM ? true : e.hp > 0;
+                            if (checkHp && p.mesh.position.distanceTo(e.mesh.position) < 1) {
+                                if (e.hp > 0) {
+                                    const prevHp = e.hp;
+                                    e.takeDamage(p.damage);
+                                    if (prevHp > 0 && e.hp <= 0) {
+                                        e.hp = 0;
+                                        lastKillInfo = {
+                                            killerPos: p.origin ? p.origin.clone() : p1.mesh.position.clone(),
+                                            victimPos: e.mesh.position.clone(),
+                                            hitPos: p.mesh.position.clone(),
+                                            killerCamPos: p1.camera.position.clone(),
+                                            killerCamQuat: p1.camera.quaternion.clone(),
+                                            killerReplay: snapshotReplay(),
+                                            allEnemyReplays: snapshotAllEnemyReplays(),
+                                            killerOwner: p.owner,
+                                            victimEnemyRef: e,   // referencia al enemigo asesinado por el jugador
+                                            projColor: p.mesh.material.color.getHex(),
+                                            projSpeed: p.vel.length(),
+                                            projSpawnTime: p.spawnTime
+                                        };
+                                    }
+                                }
+                                // Always remove bullet — dead or alive, no pass-through
                                 scene.remove(p.mesh);
                                 projectiles.splice(i, 1);
+                                hit = e;
                                 break;
                             }
                         }
@@ -1905,7 +3343,78 @@
                     }
 
                     if (hit === p1 || hit === p2) {
-                        hit.takeDamage(p.damage); // Use Projectile Damage
+                        if (hit.hp > 0) {
+                            const prevHp = hit.hp;
+                            hit.takeDamage(p.damage); // Use Projectile Damage
+
+                            if (prevHp > 0 && hit.hp <= 0) {
+                                // P1 o P2 murieron: calculamos killer/víctima según el proyectil
+                                const victimPos = hit.mesh.position.clone();
+                                const killerPos = p.origin ? p.origin.clone() : p.mesh.position.clone();
+
+                                // Resolve killer entity and camera position for all modes
+                                let killerCamPos;
+                                if (p.owner === 1) {
+                                    killerCamPos = p1.camera.position.clone();
+                                } else if (p.owner === 2) {
+                                    killerCamPos = p2.camera.position.clone();
+                                } else {
+                                    // AI enemy (owner=3): find the closest living enemy to the shot origin
+                                    let bestEnemy = null, bestDist = Infinity;
+                                    for (const en of enemies) {
+                                        if (en.hp > 0) {
+                                            const d = en.mesh.position.distanceTo(killerPos);
+                                            if (d < bestDist) { bestDist = d; bestEnemy = en; }
+                                        }
+                                    }
+                                    if (bestEnemy && bestEnemy.camera) {
+                                        killerCamPos = bestEnemy.camera.position.clone();
+                                    } else {
+                                        // Fallback: reconstruct cam behind killerPos looking at victim
+                                        const toV = victimPos.clone().sub(killerPos).normalize();
+                                        killerCamPos = killerPos.clone()
+                                            .addScaledVector(toV.clone().negate(), 6)
+                                            .add(new THREE.Vector3(0, 3, 0));
+                                    }
+                                }
+
+                                // Find the enemy that fired this projectile (closest to origin)
+                                let killerEnemy = null, bestDist2 = Infinity;
+                                for (const en of enemies) {
+                                    const d = en.mesh.position.distanceTo(killerPos);
+                                    if (d < bestDist2) { bestDist2 = d; killerEnemy = en; }
+                                }
+
+                                lastKillInfo = {
+                                    killerPos,
+                                    victimPos,
+                                    hitPos: p.mesh.position.clone(),
+                                    killerCamPos,
+                                    killerCamQuat: p.owner === 1 ? p1.camera.quaternion.clone()
+                                        : p.owner === 2 ? p2.camera.quaternion.clone()
+                                            : (killerEnemy && killerEnemy.camera ? killerEnemy.camera.quaternion.clone() : null),
+                                    killerReplay: snapshotReplay(),
+                                    allEnemyReplays: snapshotAllEnemyReplays(),
+                                    killerOwner: p.owner,
+                                    killerEnemyReplay: (killerEnemy && enemyReplayBuffers.has(killerEnemy))
+                                        ? enemyReplayBuffers.get(killerEnemy).map(f => ({
+                                            t: f.t,
+                                            meshPos: f.meshPos.clone(),
+                                            meshRotY: f.meshRotY,
+                                            armLx: f.armLx, armRx: f.armRx,
+                                            legLx: f.legLx, legRx: f.legRx,
+                                            camPos: f.camPos.clone(),
+                                            camQuat: f.camQuat.clone(),
+                                        }))
+                                        : null,
+                                    killerEnemyRef: killerEnemy,
+                                    projColor: p.mesh.material.color.getHex(),
+                                    projSpeed: p.vel.length(),
+                                    projSpawnTime: p.spawnTime
+                                };
+                            }
+                        }
+                        // Always remove bullet on contact — alive or dead, no pass-through
                         scene.remove(p.mesh);
                         projectiles.splice(i, 1);
                     }
@@ -1979,12 +3488,75 @@
                     }
 
                     if (gameMode === MODE.MENU || gameMode === MODE.END || gameMode === MODE.PVP_SELECT || gameMode === MODE.SOLO_SELECT) {
+                        const w = window.innerWidth;
+                        const h = window.innerHeight;
                         renderer.setScissorTest(false);
-                        renderer.render(scene, p1.camera); // Just render scene bg
+                        renderer.setViewport(0, 0, w, h);
+
+                        // Forzar FOV normal en modos de menú para evitar heredar zoom de sniper
+                        p1.zoomLevel = 0;
+                        p1.camera.fov = 75;
+                        p1.camera.aspect = w / h;
+                        p1.camera.updateProjectionMatrix();
+                        if (p2 && p2.camera) {
+                            p2.zoomLevel = 0;
+                            p2.camera.fov = 75;
+                            p2.camera.aspect = w / h;
+                            p2.camera.updateProjectionMatrix();
+                        }
+
+                        // Frames the bots del lobby
+                        const time = Date.now() * 0.0005;
+                        p1.camera.position.set(Math.sin(time * 0.1) * 10, 10, 30);
+                        p1.camera.lookAt(0, 5, 0);
+
+                        renderer.render(scene, p1.camera);
                         return;
                     }
 
-                    const dt = Math.min(clock.getDelta(), 0.1);
+                    // ── KILLCAM MODE ─────────────────────────────────
+                    if (gameMode === MODE.KILLCAM) {
+                        const w = window.innerWidth;
+                        const h = window.innerHeight;
+                        killcamCamera.aspect = w / h;
+
+                        let delta = clock.getDelta();
+                        if (isNaN(delta) || delta < 0) delta = 0.016;
+                        const dt = Math.min(delta, 0.1);
+
+                        // Slow-motion factor: movido a variable global KC_SLOWMO
+                        const dtSlowmo = dt * KC_SLOWMO;
+
+                        // Move in-flight projectiles at slow-mo speed so they match the killcam bullet.
+                        // Una vez que la bala principal impacta (kcImpacted), las demás se congelan.
+                        if (!kcImpacted) {
+                            projectiles.forEach(p => {
+                                p.life -= dtSlowmo;
+                                if (p.life > 0) p.mesh.position.add(p.vel.clone().multiplyScalar(dtSlowmo));
+                            });
+                            for (let i = projectiles.length - 1; i >= 0; i--) {
+                                if (projectiles[i].life <= 0) {
+                                    scene.remove(projectiles[i].mesh);
+                                    projectiles.splice(i, 1);
+                                }
+                            }
+                            // Check collisions so other bullets actually hit their targets
+                            checkCollisions();
+                        }
+
+                        // Do NOT call p1/p2/enemy .update() — players and bots stay frozen in place
+
+                        updateKillcam(performance.now());
+                        renderer.setScissorTest(false);
+                        renderer.setViewport(0, 0, w, h);
+                        renderer.render(scene, killcamCamera);
+                        return;
+                    }
+
+                    let delta = clock.getDelta();
+                    if (isNaN(delta) || delta < 0) delta = 0.016;
+                    const dt = Math.min(delta, 0.1);
+                    recordReplayFrame();
                     updateInput();
                     p1.update(dt);
 
@@ -2000,7 +3572,8 @@
                             e.update(dt); if (e.hp > 0) alive++;
                         });
                         document.getElementById('solo-enemies').innerText = "ENEMIES: " + alive;
-                        if (alive === 0) endGame(true);
+                        const aliveAfterCollisions = enemies.filter(e => e.hp > 0).length;
+                        if (enemies.length > 0 && aliveAfterCollisions === 0 && gameMode === MODE.SOLO) endGame(true);
                     }
 
                     // Projectiles
@@ -2079,6 +3652,7 @@
                 pvpWeaponSelect: document.getElementById('pvp-weapon-select'),
                 soloWeaponSelect: document.getElementById('solo-weapon-select'),
                 victory: document.getElementById('victory-screen'),
+                lastPlayFrame: document.getElementById('last-play-frame'),
                 ingameMenuBtn: document.getElementById('ingame-menu-btn'),
                 hudSolo: document.getElementById('hud-solo'),
                 hudP1: document.getElementById('hud-p1'),
@@ -2093,18 +3667,70 @@
                 soloAmmo: document.getElementById('solo-ammo'),
                 soloStamina: document.getElementById('solo-stamina-bar'),
                 winText: document.getElementById('win-text'),
-                menuBg: document.getElementById('menu-background-layer')
+                menuBg: document.getElementById('menu-background-layer'),
+                controlsScreen: document.getElementById('controls-screen'),
+                difficultySelect: document.getElementById('difficulty-select')
             }
 
-                ;
+            // Controls Toggle
+            document.getElementById('controls-btn').addEventListener('click', () => {
+                ui.lobby.classList.add('hidden');
+                ui.controlsScreen.classList.remove('hidden');
+            });
+            document.getElementById('back-from-controls').addEventListener('click', () => {
+                ui.controlsScreen.classList.add('hidden');
+                ui.lobby.classList.remove('hidden');
+            });
+
+            ;
 
             // ... (lines omitted)
+
+            let soloBotCount = 3;
+
+            function showDifficultySelect() {
+                ui.lobby.classList.add('hidden');
+                ui.difficultySelect.classList.remove('hidden');
+            }
+
+            function selectDifficulty(count) {
+                soloBotCount = count;
+                ui.difficultySelect.classList.add('hidden');
+                showSoloWeaponSelect();
+            }
+
+            function backToLobby() {
+                ui.difficultySelect.classList.add('hidden');
+                ui.soloWeaponSelect.classList.add('hidden');
+                ui.pvpWeaponSelect.classList.add('hidden');
+                ui.lobby.classList.remove('hidden');
+                gameMode = MODE.MENU;
+            }
+
+            function backToDifficulty() {
+                ui.soloWeaponSelect.classList.add('hidden');
+                ui.difficultySelect.classList.remove('hidden');
+            }
+
+            // Expose to window
+            window.selectDifficulty = selectDifficulty;
+            window.backToLobby = backToLobby;
+            window.backToDifficulty = backToDifficulty;
 
             function startSoloConfirm() {
                 // Renamed from startSolo to distinguish from the setup phase
                 // This is the actual GAME START
                 gameMode = MODE.SOLO;
                 reset();
+                lastKillInfo = null;
+                if (ui.lastPlayFrame) {
+                    ui.lastPlayFrame.classList.add('hidden');
+                    ui.lastPlayFrame.style.backgroundImage = '';
+                }
+                // Clear Menu Bots
+                if (window.clearMenuBots) window.clearMenuBots();
+                if (window.menuLight) window.menuLight.visible = false;
+                scene.fog.near = 20; // Restore fog
 
                 // Spawn Enemies
                 enemies.forEach(e => {
@@ -2112,24 +3738,32 @@
                 });
                 enemies.length = 0;
 
-                enemySpawnPoints.forEach(p => {
+                // Spawn Exactly soloBotCount enemies
+                for (let i = 0; i < soloBotCount; i++) {
+                    const p = enemySpawnPoints[i % enemySpawnPoints.length];
                     enemies.push(new AIEnemy(p));
-                });
+                }
 
                 ui.lobby.classList.add('hidden');
                 ui.soloWeaponSelect.classList.add('hidden');
-                if (ui.menuBg) ui.menuBg.classList.add('hidden');
+                if (ui.menuBg) ui.menuBg.classList.add('hidden'); // KEEP HIDDEN
                 ui.hudSolo.style.display = 'block';
                 ui.ingameMenuBtn.classList.remove('hidden'); // SHOW BUTTON
-                scene.remove(p2.mesh);
 
-                document.body.requestPointerLock();
+                if (!p1.mesh.parent) scene.add(p1.mesh); // ADD P1
+                if (p2.mesh.parent) scene.remove(p2.mesh); // REMOVE P2
+
+                document.body.requestPointerLock?.()?.catch(() => { });
             }
-
             function startPvP() {
                 try {
                     gameMode = MODE.PVP;
                     reset();
+                    lastKillInfo = null;
+                    if (ui.lastPlayFrame) {
+                        ui.lastPlayFrame.classList.add('hidden');
+                        ui.lastPlayFrame.style.backgroundImage = '';
+                    }
                     // Place Players
                     p1.respawn(new THREE.Vector3(0, 20, -80));
                     p2.respawn(new THREE.Vector3(15, 20, 80)); // Spawn OFFSET to avoid tree (was 0, 20, 80)
@@ -2143,13 +3777,17 @@
 
                     ui.lobby.classList.add('hidden');
                     if (ui.menuBg) ui.menuBg.classList.add('hidden');
+                    clearLobbyBots(); // Clear lobby bots when game starts
                     ui.hudP1.style.display = 'block';
                     ui.hudP2.style.display = 'block';
                     ui.ingameMenuBtn.classList.remove('hidden'); // SHOW BUTTON
 
+                    if (!p1.mesh.parent) scene.add(p1.mesh);
                     if (!p2.mesh.parent) scene.add(p2.mesh);
 
-                    document.body.requestPointerLock();
+                    document.body.requestPointerLock?.()?.catch?.(err => {
+                        console.warn("Pointer lock failed:", err.message);
+                    });
                 }
 
                 catch (err) {
@@ -2159,12 +3797,32 @@
             }
 
             function reset() {
+                gameEnding = false;
                 p1.respawn(new THREE.Vector3(0, 20, 0));
                 // Clear projs
                 projectiles.forEach(p => scene.remove(p.mesh));
                 projectiles.length = 0;
 
+                // Clean up any active killcam
+                if (kcBulletMesh) { scene.remove(kcBulletMesh); kcBulletMesh = null; }
+                kcActive = false;
+                kcCallback = null;
+                if (kcOverlay) kcOverlay.style.display = 'none';
+                if (kcBarTop) kcBarTop.style.height = '0';
+                if (kcBarBot) kcBarBot.style.height = '0';
+                if (kcLabel) kcLabel.style.opacity = '0';
+                if (kcSlowmo) kcSlowmo.style.opacity = '0';
+                if (kcTimerBar) kcTimerBar.style.opacity = '0';
+                if (kcColorGrade) kcColorGrade.style.opacity = '0';
+                if (kcImpact) kcImpact.style.opacity = '0';
+
+                // Limpiar último replay
+                lastKillInfo = null;
                 ui.victory.classList.add('hidden');
+                if (ui.lastPlayFrame) {
+                    ui.lastPlayFrame.classList.add('hidden');
+                    ui.lastPlayFrame.style.backgroundImage = '';
+                }
                 ui.hudSolo.style.display = 'none';
                 ui.hudP1.style.display = 'none';
                 ui.hudP2.style.display = 'none';
@@ -2174,8 +3832,28 @@
             function returnToMenu() {
                 try {
                     gameMode = MODE.MENU;
-                    document.exitPointerLock();
+                    // Eliminar cualquier enemigo que haya quedado en escena (por ejemplo si moriste antes de matarlos a todos)
+                    enemies.forEach(e => {
+                        if (e.mesh && e.mesh.parent) scene.remove(e.mesh);
+                    });
+                    enemies.length = 0;
+                    spawnLobbyBots(); // Respawn bots when returning to menu
+                    if (document.pointerLockElement) document.exitPointerLock();
+                    lastKillInfo = null;
+                    // Asegurar que la cámara del menú no herede el zoom del juego (sniper)
+                    p1.zoomLevel = 0;
+                    p1.camera.fov = 75;
+                    p1.camera.updateProjectionMatrix();
+                    if (p2 && p2.camera) {
+                        p2.zoomLevel = 0;
+                        p2.camera.fov = 75;
+                        p2.camera.updateProjectionMatrix();
+                    }
                     ui.victory.classList.add('hidden');
+                    if (ui.lastPlayFrame) {
+                        ui.lastPlayFrame.classList.add('hidden');
+                        ui.lastPlayFrame.style.backgroundImage = '';
+                    }
                     ui.soloWeaponSelect.classList.add('hidden');
                     ui.pvpWeaponSelect.classList.add('hidden');
                     ui.lobby.classList.remove('hidden');
@@ -2193,16 +3871,141 @@
             }
 
             function endGame(won, msg) {
-                gameMode = MODE.END;
-                document.exitPointerLock();
-                ui.victory.classList.remove('hidden');
+                // Prevent double-trigger
+                if (gameMode === MODE.END || gameMode === MODE.KILLCAM) return;
+
+                // Stop all AI updates immediately (prevents NaN mid-frame)
+                gameEnding = true;
+
+                // Exit pointer lock immediately
+                if (document.pointerLockElement) document.exitPointerLock();
+
+                // Hide HUDs now
                 ui.hudSolo.style.display = 'none';
                 ui.hudP1.style.display = 'none';
                 ui.hudP2.style.display = 'none';
                 ui.ingameMenuBtn.classList.add('hidden');
 
+                // Play killcam first, THEN show victory screen
+                startKillcam(() => actualEndGame(won, msg));
+            }
+
+            function actualEndGame(won, msg) {
+                // Colocamos la cámara cerca de la ÚLTIMA muerte (asesino/víctima) y capturamos ese frame
+                try {
+                    if (ui.lastPlayFrame && renderer && renderer.domElement) {
+                        const origPos = p1.camera.position.clone();
+                        const origQuat = p1.camera.quaternion.clone();
+
+                        if (lastKillInfo && lastKillInfo.killerCamPos) {
+                            p1.camera.position.copy(lastKillInfo.killerCamPos);
+                            if (lastKillInfo.killerCamQuat) {
+                                p1.camera.quaternion.copy(lastKillInfo.killerCamQuat);
+                            } else if (lastKillInfo.victimPos) {
+                                p1.camera.lookAt(lastKillInfo.victimPos);
+                            }
+                            // Pull back a bit more from the killer's POV to ensure visibility (Requested by user)
+                            const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(p1.camera.quaternion);
+                            p1.camera.position.addScaledVector(forward, -5);
+                        }
+
+                        // ── FORCE ENTITY STATE FOR SCREENSHOT ──
+                        // This ensures the killer and victim are visible and correctly placed, 
+                        // even if the replay interpolation was slightly off or they were hidden.
+                        if (lastKillInfo) {
+                            // Position Victim
+                            p1.mesh.position.copy(lastKillInfo.victimPos);
+                            p1.mesh.visible = true;
+                            if (!p1.mesh.parent) scene.add(p1.mesh);
+
+                            // Position Killer
+                            let killerEntity = null;
+                            if (lastKillInfo.killerOwner === 1) {
+                                killerEntity = p1;
+                            } else if (lastKillInfo.killerOwner === 2) {
+                                killerEntity = p2;
+                            } else {
+                                // Find killer AI by ref or proximity
+                                killerEntity = lastKillInfo.killerEnemyRef;
+                                if (!killerEntity) {
+                                    let bestDist = Infinity;
+                                    for (let en of enemies) {
+                                        let d = en.mesh.position.distanceTo(lastKillInfo.killerPos);
+                                        if (d < bestDist) { bestDist = d; killerEntity = en; }
+                                    }
+                                }
+                            }
+
+                            if (killerEntity && killerEntity.mesh) {
+                                killerEntity.mesh.position.copy(lastKillInfo.killerPos);
+                                killerEntity.mesh.visible = true;
+                                if (!killerEntity.mesh.parent) scene.add(killerEntity.mesh);
+                            }
+
+                            // Ensure all other players/enemies are at least visible for the backdrop
+                            if (p2 && p2.mesh) p2.mesh.visible = true;
+                            // Solo el enemigo víctima debe ser visible — los anteriormente
+                            // eliminados no deben reaparecer en el screenshot final.
+                            if (lastKillInfo.victimEnemyRef) {
+                                const ve = lastKillInfo.victimEnemyRef;
+                                if (!ve.mesh.parent) scene.add(ve.mesh);
+                                ve.mesh.visible = true;
+                                ve.mesh.traverse(child => { if (child.isMesh) child.visible = true; });
+                            }
+                        }
+
+                        // Renderizamos una vez con esta cámara a pantalla completa y capturamos
+                        const w = window.innerWidth;
+                        const h = window.innerHeight;
+                        p1.camera.aspect = w / h;
+                        p1.camera.updateProjectionMatrix();
+                        renderer.setScissorTest(false);
+                        renderer.setViewport(0, 0, w, h);
+                        renderer.render(scene, p1.camera);
+
+                        const dataURL = renderer.domElement.toDataURL('image/png');
+                        ui.lastPlayFrame.style.backgroundImage = `url(${dataURL})`;
+                        ui.lastPlayFrame.classList.remove('hidden');
+
+                        // Restauramos la cámara para que el loop siga normal
+                        p1.camera.position.copy(origPos);
+                        p1.camera.quaternion.copy(origQuat);
+
+                        // Resetear zoom/FOV
+                        p1.zoomLevel = 0;
+                        p1.camera.fov = 75;
+                        p1.camera.updateProjectionMatrix();
+                        if (p2 && p2.camera) {
+                            p2.zoomLevel = 0;
+                            p2.camera.fov = 75;
+                            p2.camera.updateProjectionMatrix();
+                        }
+                    }
+                }
+
+                catch (e) {
+                    console.warn("No se pudo capturar la última jugada:", e);
+                }
+
+                gameMode = MODE.END;
+                ui.victory.classList.remove('hidden');
+                if (ui.menuBg) ui.menuBg.classList.remove('hidden');
+
                 if (msg) ui.winText.innerText = msg;
-                else ui.winText.innerText = won ? "VICTORY ROYALE" : "FAILED";
+                else ui.winText.innerText = won ? "WIN" : "FAILED";
+
+                // ── Scene Cleanup (Requested by user: remove everyone and bullets after screenshot) ──
+                projectiles.forEach(p => { if (p.mesh.parent) scene.remove(p.mesh); });
+                projectiles.length = 0;
+
+                enemies.forEach(e => { if (e.mesh.parent) scene.remove(e.mesh); });
+                enemies.length = 0;
+
+                if (p1.mesh.parent) scene.remove(p1.mesh);
+                if (p2 && p2.mesh.parent) scene.remove(p2.mesh);
+
+                // Also remove bullets from replay buffer
+                projectileReplayBuffer.length = 0;
             }
 
             function updateUI() {
@@ -2236,7 +4039,7 @@
             // SOLO FLOW
             document.getElementById('solo-btn').onclick = (e) => {
                 e.stopPropagation();
-                showSoloWeaponSelect();
+                showDifficultySelect();
             }
 
                 ;
@@ -2283,10 +4086,7 @@
 
             document.getElementById('restart-btn').onclick = (e) => {
                 e.stopPropagation();
-                gameMode = MODE.MENU;
-                ui.victory.classList.add('hidden');
-                ui.lobby.classList.remove('hidden');
-                ui.soloWeaponSelect.classList.add('hidden'); // Ensure closed
+                returnToMenu();
             }
 
                 ;
@@ -2380,6 +4180,9 @@
                 }
             });
 
+            spawnLobbyBots();
+            if (p1.mesh.parent) scene.remove(p1.mesh);
+            if (p2.mesh.parent) scene.remove(p2.mesh);
             render();
         </script>
 </body>
