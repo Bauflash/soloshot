@@ -2793,11 +2793,11 @@
                 // ── Compresor cinematográfico ─────────────────────────────
                 // Ratio alto + attack rápido = transientes apretados, sonido "glue"
                 _comp = ctx.createDynamicsCompressor();
-                _comp.threshold.value = -24;   // más agresivo que v4
-                _comp.knee.value      =   6;
-                _comp.ratio.value     =  10;   // cinematográfico (era 5)
-                _comp.attack.value    = 0.001; // attack rápido = punch controlado
-                _comp.release.value   = 0.18;
+                _comp.threshold.value = -12;   // menos agresivo → más punch en impactos
+                _comp.knee.value      =  10;
+                _comp.ratio.value     =   5;   // menos aplastamiento
+                _comp.attack.value    = 0.003;
+                _comp.release.value   = 0.15;
                 _comp.connect(ctx.destination);
 
                 // ── Reverb de exterior (sala abierta, pre-delay 12ms) ─────
@@ -3309,8 +3309,46 @@
                                 Q: jitter(1.5, 0.08), delay: 0.040, wet: 0.58 });
 
                     } else if (surface === 'bot') {
-                        // Volumen reducido: el disparo protagoniza, el clang es detalle
-                        metalClang(0.30 * vm);
+                        // IMPACTO CHALECO — nodos directos, sin reverb, máximo punch
+                        try {
+                            const ctx2 = ac(); const t2 = ctx2.currentTime;
+
+                            // Thud principal (lowpass, seco al 100%)
+                            const ns1 = _noiseSource(0.08);
+                            const f1  = ctx2.createBiquadFilter();
+                            f1.type = 'lowpass';
+                            f1.frequency.setValueAtTime(380, t2);
+                            f1.frequency.exponentialRampToValueAtTime(75, t2 + 0.07);
+                            f1.Q.value = 0.5;
+                            const g1 = ctx2.createGain();
+                            g1.gain.setValueAtTime(3.0 * vm, t2);
+                            g1.gain.exponentialRampToValueAtTime(0.0001, t2 + 0.07);
+                            ns1.connect(f1); f1.connect(g1); g1.connect(_comp);
+                            ns1.start(t2); ns1.stop(t2 + 0.09);
+
+                            // Toque metálico de placa (highpass breve)
+                            const ns2 = _noiseSource(0.022);
+                            const f2  = ctx2.createBiquadFilter();
+                            f2.type = 'highpass';
+                            f2.frequency.value = jitter(1900, 0.1);
+                            f2.Q.value = 0.5;
+                            const g2 = ctx2.createGain();
+                            g2.gain.setValueAtTime(2.0 * vm, t2);
+                            g2.gain.exponentialRampToValueAtTime(0.0001, t2 + 0.020);
+                            ns2.connect(f2); f2.connect(g2); g2.connect(_comp);
+                            ns2.start(t2); ns2.stop(t2 + 0.03);
+
+                            // Sub de cuerpo (sine 70Hz)
+                            const os1 = ctx2.createOscillator();
+                            os1.type = 'sine';
+                            os1.frequency.setValueAtTime(70, t2);
+                            os1.frequency.exponentialRampToValueAtTime(28, t2 + 0.09);
+                            const g3 = ctx2.createGain();
+                            g3.gain.setValueAtTime(1.6 * vm, t2);
+                            g3.gain.exponentialRampToValueAtTime(0.0001, t2 + 0.09);
+                            os1.connect(g3); g3.connect(_comp);
+                            os1.start(t2); os1.stop(t2 + 0.10);
+                        } catch(e) {}
                     }
                 },
 
@@ -3365,15 +3403,16 @@
              * minDist: dentro de esta distancia = vol máximo
              * maxDist: a partir de aquí = vol mínimo
              */
-            function sfxDistVol(pos3d, minDist = 8, maxDist = 80) {
+            function sfxDistVol(pos3d, minDist = 6, maxDist = 55) {
                 if (gameMode !== MODE.SOLO) return 1;
                 const listenerPos = p1 && p1.camera ? p1.camera.position : null;
                 if (!listenerPos || !pos3d) return 1;
                 const d = listenerPos.distanceTo(pos3d);
                 if (d <= minDist) return 1;
-                if (d >= maxDist) return 0.05;
+                if (d >= maxDist) return 0.02;
                 const t = (d - minDist) / (maxDist - minDist);
-                return Math.max(0.05, 1 - t * t * 0.95);
+                // Curva cúbica: cae mucho más rápido que cuadrática
+                return Math.max(0.02, 1 - t * t * t);
             }
 
             // ══════════════════════════════════════════════
@@ -3478,11 +3517,11 @@
             //   color    — color hex del proyectil visual
             // ══════════════════════════════════════════════════════════════
             const WEAPON_CONFIG = {
-                sniper:  { dmg: 20,  speed: 150, reload: 2000, cd: 800,  maxAmmo: 10, range: 400, recoil: 0.18, color: 0x00ff88 },
-                ar:      { dmg: 10,  speed:  70, reload: 2000, cd: 200,  maxAmmo: 30, range: 200, recoil: 0.05, color: 0xffff00 },
-                smg:     { dmg:  5,  speed:  60, reload: 2000, cd: 100,  maxAmmo: 40, range: 100, recoil: 0.03, color: 0x00ffff },
-                pistol:  { dmg: 15,  speed:  60, reload: 1000, cd: 400,  maxAmmo: 20, range: 150, recoil: 0.08, color: 0xff4444 },
-                shotgun: { dmg: 25,  speed:  60, reload: 3000, cd: 1200, maxAmmo:  8, range:  70, recoil: 0.22, color: 0xff8800 },
+                sniper:  { dmg: 20,  speed: 300, reload: 2000, cd: 800,  maxAmmo: 10, range: 400, recoil: 0.18, color: 0x00ff88 },
+                ar:      { dmg: 10,  speed: 300, reload: 2000, cd: 200,  maxAmmo: 30, range: 200, recoil: 0.05, color: 0xffff00 },
+                smg:     { dmg:  5,  speed: 300, reload: 2000, cd: 100,  maxAmmo: 40, range: 100, recoil: 0.03, color: 0x00ffff },
+                pistol:  { dmg: 15,  speed: 300, reload: 1000, cd: 400,  maxAmmo: 20, range: 150, recoil: 0.08, color: 0xff4444 },
+                shotgun: { dmg: 25,  speed: 300, reload: 3000, cd: 1200, maxAmmo:  8, range:  70, recoil: 0.22, color: 0xff8800 },
             };
 
             // WEAPONS — agrega el nombre display; stats provienen de WEAPON_CONFIG.
@@ -4601,16 +4640,17 @@
                 const matStucco    = new THREE.MeshStandardMaterial({ color:0xd4c8a0, roughness:0.92, metalness:0.01 });
                 const matStucco2   = new THREE.MeshStandardMaterial({ color:0xc0b490, roughness:0.90, metalness:0.01 });
                 const matStuccoDark= new THREE.MeshStandardMaterial({ color:0xa89878, roughness:0.90, metalness:0.01 });
-                const matIndoor    = new THREE.MeshStandardMaterial({ color:0x9a7c5a, roughness:0.65, metalness:0.05 });
-                const matMarble    = new THREE.MeshStandardMaterial({ color:0xe8e0d0, roughness:0.20, metalness:0.05 });
+                const matIndoor    = new THREE.MeshStandardMaterial({ color:0x9a7c5a, roughness:0.65, metalness:0.05, polygonOffset:true, polygonOffsetFactor:-1, polygonOffsetUnits:-1 });
+                const matMarble    = new THREE.MeshStandardMaterial({ color:0xe8e0d0, roughness:0.20, metalness:0.05, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2 });
                 const matOutdoor   = new THREE.MeshStandardMaterial({ color:0x888878, roughness:0.96, metalness:0.00 });
+                const matPaving    = new THREE.MeshStandardMaterial({ color:0x888878, roughness:0.96, metalness:0.00, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2 });
                 const matGrass     = new THREE.MeshStandardMaterial({ color:0x3a7a2e, roughness:1.00, metalness:0.00 });
                 const matGrassDark = new THREE.MeshStandardMaterial({ color:0x2d6020, roughness:1.00, metalness:0.00 });
-                const matCourt     = new THREE.MeshStandardMaterial({ color:0xc07030, roughness:0.95, metalness:0.00 });
-                const matCourtLine = new THREE.MeshBasicMaterial({ color:0xffffff });
+                const matCourt     = new THREE.MeshStandardMaterial({ color:0xc07030, roughness:0.95, metalness:0.00, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2 });
+                const matCourtLine = new THREE.MeshBasicMaterial({ color:0xffffff, polygonOffset:true, polygonOffsetFactor:-3, polygonOffsetUnits:-3 });
                 const matPool      = new THREE.MeshStandardMaterial({ color:0x0e7599, roughness:0.15, metalness:0.10, transparent:true, opacity:0.88 });
                 const matPoolWall  = new THREE.MeshStandardMaterial({ color:0x1a7fa0, roughness:0.4,  metalness:0.08 });
-                const matTile      = new THREE.MeshStandardMaterial({ color:0xc8c0b0, roughness:0.50, metalness:0.05 });
+                const matTile      = new THREE.MeshStandardMaterial({ color:0xc8c0b0, roughness:0.50, metalness:0.05, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2 });
                 const matDeck      = new THREE.MeshStandardMaterial({ color:0xb8985a, roughness:0.85, metalness:0.00 });
                 const matWood      = new THREE.MeshStandardMaterial({ color:0x6b4c2a, roughness:0.80, metalness:0.00 });
                 const matDarkWood  = new THREE.MeshStandardMaterial({ color:0x3b2a1a, roughness:0.75, metalness:0.00 });
@@ -4632,7 +4672,7 @@
                 const matCeiling   = new THREE.MeshStandardMaterial({ color:0xe8e4dc, roughness:0.98, metalness:0.00 });
                 const matRoof      = new THREE.MeshStandardMaterial({ color:0x5a4028, roughness:0.90, metalness:0.00 });
                 const matConcrete  = new THREE.MeshStandardMaterial({ color:0x909090, roughness:0.95, metalness:0.00 });
-                const matHelipad   = new THREE.MeshStandardMaterial({ color:0x303030, roughness:0.90, metalness:0.00 });
+                const matHelipad   = new THREE.MeshStandardMaterial({ color:0x303030, roughness:0.90, metalness:0.00, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2 });
                 const matHeliLine  = new THREE.MeshBasicMaterial({ color:0xffff00 });
                 const matPlanter   = new THREE.MeshStandardMaterial({ color:0x6a5040, roughness:0.88, metalness:0.00 });
                 const matPlant     = new THREE.MeshStandardMaterial({ color:0x2a8a20, roughness:1.00, metalness:0.00 });
@@ -4640,7 +4680,7 @@
                 const matScreen    = new THREE.MeshStandardMaterial({ color:0x101820, roughness:0.10, metalness:0.40 });
                 const matLamp      = new THREE.MeshStandardMaterial({ color:0xffe080, roughness:0.30, metalness:0.50 });
                 const matFence     = new THREE.MeshStandardMaterial({ color:0x484848, roughness:0.40, metalness:0.70 });
-                const matTennisClay= new THREE.MeshStandardMaterial({ color:0xc05a30, roughness:0.98, metalness:0.00 });
+                const matTennisClay= new THREE.MeshStandardMaterial({ color:0xc05a30, roughness:0.98, metalness:0.00, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2 });
 
                 // ── HELPERS ──────────────────────────────────────────────────
                 function box(mat, w, h, d, x, y, z, solid=false, ry=0) {
@@ -4712,23 +4752,19 @@
                 // ════════════════════════════════════════════════════════════
                 // GROUND PLANES
                 // ════════════════════════════════════════════════════════════
-                plane(matOutdoor, 400, 400, 0, 0, 0);                    // base concrete
-                plane(matGrass,   260, 380, -70, 0.01,  0);              // left grass zone
-                plane(matGrass,   130, 120, 130, 0.01, 60);              // right-back grass
-                plane(matGrass,    80,  30,   0, 0.01,-55);              // front strip
-                plane(matGrass,    80,  30,   0, 0.01, 55);              // back strip
-                plane(matGrassDark,70,  30, -105,0.01,-50);              // far left back
-                plane(matIndoor,   80,  60,   0, 0.02,  0);              // house interior floor
-                plane(matMarble,   10,  16,   0, 0.03,  0);              // marble hallway inlay
-                plane(matTile,     30,  30, -22, 0.02,-14);              // kitchen tile
-                plane(matTile,     30,  30,  22, 0.02, 14);              // dining tile
+                plane(matGrass, 400, 400, 0, 0, 0);                      // base grass
+                // grass overlay planes removed — base plane IS grass now
+                plane(matIndoor,   80,  60,   0, 0.002,  0);              // house interior floor
+                plane(matMarble,   10,  16,   0, 0.002,  0);              // marble hallway inlay
+                plane(matTile,     30,  30, -22, 0.002,-14);              // kitchen tile
+                plane(matTile,     30,  30,  22, 0.002, 14);              // dining tile
 
                 // ════════════════════════════════════════════════════════════
                 // DRIVEWAY + ENTRANCE GATE
                 // ════════════════════════════════════════════════════════════
-                plane(matOutdoor, 16, 80, -75, 0.015, 0);   // main driveway
-                plane(matOutdoor, 20, 28, -52, 0.015,-20);  // parking pad left
-                plane(matOutdoor, 20, 28, -52, 0.015, 20);  // parking pad right
+                plane(matPaving, 16, 80, -75, 0.002, 0);   // main driveway
+                plane(matPaving, 20, 28, -52, 0.002,-20);  // parking pad left
+                plane(matPaving, 20, 28, -52, 0.002, 20);  // parking pad right
 
                 // Gate pillars
                 box(matStucco, 2.5, 5,   2.5, -85,  2.5, -7, true);
@@ -4782,15 +4818,15 @@
                 // BASKETBALL COURT
                 // ════════════════════════════════════════════════════════════
                 const CX=-130, CZ=0, CW=70, CD=42;
-                plane(matCourt,    CW, CD, CX, 0.02, CZ);
-                plane(matCourtLine, CW, 0.25, CX, 0.03, CZ);
-                plane(matCourtLine, 0.25, CD, CX, 0.03, CZ);
-                plane(matCourtLine, 0.25, CD*0.6, CX-CW*0.32, 0.03, CZ);
-                plane(matCourtLine, CW*0.3, 0.25, CX-CW*0.3, 0.03, CZ-CD*0.18);
-                plane(matCourtLine, CW*0.3, 0.25, CX-CW*0.3, 0.03, CZ+CD*0.18);
-                plane(matCourtLine, 0.25, CD*0.6, CX+CW*0.32, 0.03, CZ);
-                plane(matCourtLine, CW*0.3, 0.25, CX+CW*0.3, 0.03, CZ-CD*0.18);
-                plane(matCourtLine, CW*0.3, 0.25, CX+CW*0.3, 0.03, CZ+CD*0.18);
+                plane(matCourt,    CW, CD, CX, 0.002, CZ);
+                plane(matCourtLine, CW, 0.25, CX, 0.002, CZ);
+                plane(matCourtLine, 0.25, CD, CX, 0.002, CZ);
+                plane(matCourtLine, 0.25, CD*0.6, CX-CW*0.32, 0.002, CZ);
+                plane(matCourtLine, CW*0.3, 0.25, CX-CW*0.3, 0.002, CZ-CD*0.18);
+                plane(matCourtLine, CW*0.3, 0.25, CX-CW*0.3, 0.002, CZ+CD*0.18);
+                plane(matCourtLine, 0.25, CD*0.6, CX+CW*0.32, 0.002, CZ);
+                plane(matCourtLine, CW*0.3, 0.25, CX+CW*0.3, 0.002, CZ-CD*0.18);
+                plane(matCourtLine, CW*0.3, 0.25, CX+CW*0.3, 0.002, CZ+CD*0.18);
                 // Hoops
                 // Left hoop — pole near baseline, arm goes in X toward court center
                 box(matMetal, 0.2, 3.8, 0.2, CX-CW/2+1.5, 1.9, CZ, true);          // pole
@@ -4826,12 +4862,12 @@
                 // TENNIS COURT (behind basketball, far left)
                 // ════════════════════════════════════════════════════════════
                 const TX=-140, TZ=-80, TW=36, TD=18;
-                plane(matTennisClay, TW+8, TD+8, TX, 0.02, TZ);
-                plane(matCourtLine, TW, TD, TX, 0.03, TZ);
-                plane(matCourtLine, 0.2, TD, TX, 0.04, TZ);
-                plane(matCourtLine, TW, 0.2, TX, 0.04, TZ);
-                plane(matCourtLine, 0.2, TD, TX-TW*0.25, 0.04, TZ);
-                plane(matCourtLine, 0.2, TD, TX+TW*0.25, 0.04, TZ);
+                plane(matTennisClay, TW+8, TD+8, TX, 0.002, TZ);
+                plane(matCourtLine, TW, TD, TX, 0.002, TZ);
+                plane(matCourtLine, 0.2, TD, TX, 0.002, TZ);
+                plane(matCourtLine, TW, 0.2, TX, 0.002, TZ);
+                plane(matCourtLine, 0.2, TD, TX-TW*0.25, 0.002, TZ);
+                plane(matCourtLine, 0.2, TD, TX+TW*0.25, 0.002, TZ);
                 // Net
                 box(matWhite, TW, 1.0, 0.1, TX, 0.5, TZ, true);
                 // Tennis lights
@@ -4852,7 +4888,7 @@
                 // POOL + DECK AREA (right side x:80..190)
                 // ════════════════════════════════════════════════════════════
                 const PX=118, PZ=0, PW=55, PD=32, PDEPTH=1.5;
-                plane(matTile, 110, 80, PX+8, 0.01, PZ);
+                plane(matTile, 110, 80, PX+8, 0.002, PZ);
                 plane(matPool, PW-1, PD-1, PX, -PDEPTH+0.05, PZ);
                 // Pool walls (SOLID thick)
                 box(matPoolWall, PW, PDEPTH*2+0.5, WT*2, PX, -PDEPTH/2, PZ-PD/2, true);
@@ -4898,7 +4934,7 @@
                 // HELIPAD (far right)
                 // ════════════════════════════════════════════════════════════
                 const HLX=160, HLZ=-60;
-                plane(matHelipad, 26, 26, HLX, 0.015, HLZ);
+                plane(matHelipad, 26, 26, HLX, 0.002, HLZ);
                 // H marking
                 box(matHeliLine, 0.6, 0.05, 14, HLX, 0.025, HLZ, false);
                 box(matHeliLine, 0.6, 0.05, 14, HLX-5, 0.025, HLZ);
@@ -4926,7 +4962,7 @@
                 // ════════════════════════════════════════════════════════════
                 const GX=68, GZ=-22, GW=30, GD=24, GH=5;
                 // Floors
-                plane(matOutdoor, GW, GD, GX, 0.015, GZ);
+                plane(matPaving, GW, GD, GX, 0.002, GZ);
                 // Walls
                 box(matStucco, GW, GH, WT, GX, GH/2, GZ-GD/2, true);   // front
                 box(matStucco, GW, GH, WT, GX, GH/2, GZ+GD/2, true);   // back
@@ -4945,7 +4981,7 @@
                 car(matCar1, GX-9, GZ);
                 car(matCar3, GX+9, GZ);
                 // Driveway to garage
-                plane(matOutdoor, GW, 35, GX, 0.015, GZ+GD/2+17);
+                plane(matPaving, GW, 35, GX, 0.002, GZ+GD/2+17);
                 // Parked car outside
                 car(matCar2, 52, -22, 0.1);
 
@@ -5120,11 +5156,55 @@
                 // Underside trim
                 box(matCeiling, 80, 0.3, 60, 0, F2-0.15, 0);
 
-                // Second floor walls
-                box(matStucco, 80, W2H, WT, 0, F2+W2H/2, -30, true);   // front
-                box(matStucco, WT, W2H, 40, -40, F2+W2H/2, -10, true);  // left
-                box(matStucco, WT, W2H, 40,  40, F2+W2H/2, -10, true);  // right
-                box(matStucco, 80, W2H, WT,  0, F2+W2H/2,  10, true);   // back of rooms
+                // Second floor walls — ventanas abiertas para disparar y salir
+                // WH=5, W2H=4.5, techo en y=9.5
+                // Ventanas: 10 ancho x 3.0 alto (F2+0.8 a F2+3.8)
+                // Estructura por pared: franja baja (sill) + franja alta (lintel) + columnas entre ventanas
+
+                // ── PARED FRONTAL (z=-30, mira al exterior, x: -40..+40) ──
+                // sill: F2+0 a F2+0.8  →  h=0.8, cy=F2+0.4
+                box(matStucco, 80, 0.8, WT,   0,  F2+0.4,    -30, true);
+                // lintel: F2+3.8 a F2+4.5  →  h=0.7, cy=F2+4.15
+                box(matStucco, 80, 0.7, WT,   0,  F2+4.15,   -30, true);
+                // Columnas entre ventanas (ventanas en x=-25, x=0, x=+25, cada una 10 ancha)
+                // Ventana izq:   x=-30..-20  → columna izq: x=-40..-30 (w=10, cx=-35)
+                box(matStucco, 10, 3.0, WT, -35,  F2+2.3,    -30, true);
+                // entre izq y centro: x=-20..-5 (w=15, cx=-12.5)
+                box(matStucco, 15, 3.0, WT,-12.5, F2+2.3,    -30, true);
+                // entre centro y der: x=+5..+20 (w=15, cx=+12.5)
+                box(matStucco, 15, 3.0, WT, 12.5, F2+2.3,    -30, true);
+                // columna der: x=+30..+40 (w=10, cx=+35)
+                box(matStucco, 10, 3.0, WT,  35,  F2+2.3,    -30, true);
+                // Ventana izq:  x=-30..-20 → ABIERTA
+                // Ventana centro: x=-5..+5 → ABIERTA
+                // Ventana der:  x=+20..+30 → ABIERTA
+
+                // ── PARED IZQUIERDA (x=-40, z: -30..+10) ──
+                box(matStucco, WT, 0.8, 40, -40,  F2+0.4,    -10, true);  // sill
+                box(matStucco, WT, 0.7, 40, -40,  F2+4.15,   -10, true);  // lintel
+                // Ventanas en z=-20 y z=0, cada una 10 ancha
+                // columna sur: z=-30..-25 (d=5, cz=-27.5)
+                box(matStucco, WT, 3.0,  5, -40,  F2+2.3,  -27.5, true);
+                // entre z=-15 y z=+5 (d=20, cz=-5)
+                box(matStucco, WT, 3.0, 20, -40,  F2+2.3,    -5,  true);
+                // columna norte: z=+5..+10 (d=5, cz=+7.5)
+                box(matStucco, WT, 3.0,  5, -40,  F2+2.3,    7.5, true);
+                // Ventana sur:  z=-25..-15 → ABIERTA
+                // Ventana norte: z=-5..+5  → ABIERTA
+
+                // ── PARED DERECHA (x=+40, z: -30..+10) ──
+                box(matStucco, WT, 0.8, 40,  40,  F2+0.4,    -10, true);  // sill
+                box(matStucco, WT, 0.7, 40,  40,  F2+4.15,   -10, true);  // lintel
+                // columna sur: z=-30..-25
+                box(matStucco, WT, 3.0,  5,  40,  F2+2.3,  -27.5, true);
+                // entre z=-15 y z=+5
+                box(matStucco, WT, 3.0, 20,  40,  F2+2.3,    -5,  true);
+                // columna norte: z=+5..+10
+                box(matStucco, WT, 3.0,  5,  40,  F2+2.3,    7.5, true);
+                // Ventana sur:  z=-25..-15 → ABIERTA
+                // Ventana norte: z=-5..+5  → ABIERTA
+
+                box(matStucco, 80, W2H, WT,  0, F2+W2H/2,  10, true);   // back of rooms (da al balcón)
 
                 // Interior walls 2F — dividing into 3 bedrooms
                 box(matStucco, WT, W2H, 40, -20, F2+W2H/2, -10, true);  // bedroom divider
@@ -5845,9 +5925,10 @@
                 return false;
             }
 
-            function createWeaponModel(weaponType) {
+            function createWeaponModel(weaponType, weaponColor) {
                 const weaponGroup = new THREE.Group();
-                const mat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.3 });
+                const baseColor = weaponColor != null ? weaponColor : 0x222222;
+                const mat = new THREE.MeshStandardMaterial({ color: baseColor, metalness: 0.7, roughness: 0.35 });
 
                 if (weaponType === 'pistol') {
                     // Handle at Z=0 (Grip)
@@ -5944,82 +6025,203 @@
                 constructor(id, color, startPos, weaponKey = 'pistol') {
                     this.id = id;
                     this.color = color;
-                    // Build Android-style Mesh
+                    // ── BUILD TACTICAL SOLDIER MESH ─────────────────────────
+                    // Colores según ID: P1=negro táctico, P2=arena/desert, bot=verde oliva
                     this.mesh = new THREE.Group();
 
-                    const mat = new THREE.MeshStandardMaterial({
-                        color: color
-                    });
+                    // ── PALETA DE COLORES POR JUGADOR ───────────────────────
+                    let cBase, cDark, cLight, cBoot, cKnee, cGoggle, cVisor, cStripe;
+                    if (id === 1) {
+                        // P1 — Operador desert / camo arena
+                        cBase   = 0xb8956a; cDark   = 0x8a6a44; cLight  = 0xd4b080;
+                        cBoot   = 0x5a3e28; cKnee   = 0x4a3220; cGoggle = 0x2a1a0a;
+                        cVisor  = 0x00ccff; cStripe = 0x00aadd;
+                    } else if (id === 2) {
+                        // P2 — Operador desert / camo arena
+                        cBase   = 0xb8956a; cDark   = 0x8a6a44; cLight  = 0xd4b080;
+                        cBoot   = 0x5a3e28; cKnee   = 0x4a3220; cGoggle = 0x2a1a0a;
+                        cVisor  = 0xff8800; cStripe = 0xffaa44;
+                    } else {
+                        // BOT — militar verde oliva
+                        cBase   = 0x2e3820; cDark   = 0x1e2814; cLight  = 0x404e2c;
+                        cBoot   = 0x141a0c; cKnee   = 0x1a2010; cGoggle = 0x0a1408;
+                        cVisor  = 0xff2200; cStripe = 0xff4400;
+                    }
 
-                    // Body (Cylinder)
-                    const bodyGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.8, 16);
-                    const body = new THREE.Mesh(bodyGeo, mat);
-                    body.position.y = 0;
-                    body.castShadow = true;
-                    this.mesh.add(body);
-                    this.body = body; // Reference for animation
+                    // ── MATERIALES ───────────────────────────────────────────
+                    const mBase  = new THREE.MeshStandardMaterial({ color:cBase,  roughness:0.85, metalness:0.05 });
+                    const mDark  = new THREE.MeshStandardMaterial({ color:cDark,  roughness:0.90, metalness:0.05 });
+                    const mLight = new THREE.MeshStandardMaterial({ color:cLight, roughness:0.80, metalness:0.05 });
+                    const mBoot  = new THREE.MeshStandardMaterial({ color:cBoot,  roughness:0.92, metalness:0.08 });
+                    const mKnee  = new THREE.MeshStandardMaterial({ color:cKnee,  roughness:0.95, metalness:0.02 });
+                    const mVisor = new THREE.MeshStandardMaterial({ color:cVisor, roughness:0.05, metalness:0.6, emissive:new THREE.Color(cVisor), emissiveIntensity:0.25 });
+                    const mStripe= new THREE.MeshStandardMaterial({ color:cStripe,roughness:0.5,  metalness:0.4, emissive:new THREE.Color(cStripe), emissiveIntensity:0.15 });
+                    const mMetal = new THREE.MeshStandardMaterial({ color:0x303038,roughness:0.35, metalness:0.85 });
+                    const mBlack = new THREE.MeshStandardMaterial({ color:0x080808,roughness:0.88, metalness:0.05 });
+                    const mSkin  = new THREE.MeshStandardMaterial({ color:0x8a6040,roughness:0.80, metalness:0.00 });
 
-                    // Head (Half Sphere)
-                    const headGeo = new THREE.SphereGeometry(0.5, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
-                    const head = new THREE.Mesh(headGeo, mat);
-                    head.position.y = 0.4;
-                    head.castShadow = true;
-                    this.mesh.add(head);
-                    this.head = head; // Reference for animation
+                    // ── HELPER INTERNO ───────────────────────────────────────
+                    function sm(mat, w, h, d, x, y, z) {
+                        const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat);
+                        m.position.set(x,y,z); m.castShadow=true; return m;
+                    }
+                    function sc(mat, rt, rb, h, x, y, z) {
+                        const m = new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,8), mat);
+                        m.position.set(x,y,z); m.castShadow=true; return m;
+                    }
 
-                    // Legs
-                    const legGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.5, 8);
-                    const legL = new THREE.Mesh(legGeo, mat);
-                    legL.position.set(-0.2, -0.65, 0);
-                    legL.castShadow = true;
-                    this.mesh.add(legL);
-                    this.legL = legL; // Reference for animation
+                    // ════════════════════════════════════════════════════════
+                    // TORSO — this.body  (pivot y=0, rotado por animación)
+                    // ════════════════════════════════════════════════════════
+                    const bodyGrp = new THREE.Group();
+                    bodyGrp.position.y = 0.05;
 
-                    const legR = new THREE.Mesh(legGeo, mat);
-                    legR.position.set(0.2, -0.65, 0);
-                    legR.castShadow = true;
-                    this.mesh.add(legR);
-                    this.legR = legR; // Reference for animation
+                    // Cintura / pantalón táctico (parte baja del torso)
+                    bodyGrp.add(sm(mBase, 0.58, 0.20, 0.30, 0, -0.18, 0));
+                    // Cinturón táctico
+                    bodyGrp.add(sm(mDark, 0.60, 0.07, 0.32, 0, -0.09, 0));
+                    // Hebilla metálica
+                    bodyGrp.add(sm(mMetal, 0.10, 0.06, 0.06, 0, -0.09, 0.17));
 
-                    // Arms
-                    const armGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.6, 8);
-                    // armL: pivot at shoulder (-0.62, 0.4, 0), mesh hangs -0.3 below
-                    const armLPivot = new THREE.Group();
-                    armLPivot.position.set(-0.62, 0.4, 0); // shoulder position
+                    // Chaleco táctico principal (PECA / plate carrier)
+                    bodyGrp.add(sm(mLight, 0.60, 0.44, 0.30, 0, 0.13, 0));
+                    // Placa frontal (SAPI plate) — más oscura y rígida
+                    bodyGrp.add(sm(mDark, 0.44, 0.34, 0.06, 0, 0.16, 0.15));
+                    // Placa trasera
+                    bodyGrp.add(sm(mDark, 0.44, 0.34, 0.06, 0, 0.16, -0.16));
+                    // Bolsillos MOLLE frontales (3 pouches)
+                    [-0.16, 0, 0.16].forEach(px => bodyGrp.add(sm(mBase, 0.10, 0.10, 0.07, px, -0.01, 0.19)));
+                    // Bolsillo lateral izquierdo (radio pouch)
+                    bodyGrp.add(sm(mBase, 0.07, 0.18, 0.10, -0.32, 0.05, 0.10));
+                    // Bolsillo lateral derecho (admin pouch)
+                    bodyGrp.add(sm(mBase, 0.07, 0.14, 0.10,  0.32, 0.05, 0.10));
+                    // Straps / tirantes del chaleco
+                    bodyGrp.add(sm(mDark, 0.07, 0.28, 0.05, -0.20, 0.13, 0.15));
+                    bodyGrp.add(sm(mDark, 0.07, 0.28, 0.05,  0.20, 0.13, 0.15));
+                    // Cuello / collar táctico
+                    bodyGrp.add(sm(mBase, 0.28, 0.09, 0.24, 0, 0.38, 0));
+                    // Stripe / ID de equipo en hombro izquierdo
+                    bodyGrp.add(sm(mStripe, 0.04, 0.10, 0.06, -0.30, 0.32, 0.14));
+
+                    this.mesh.add(bodyGrp);
+                    this.body = bodyGrp;
+
+                    // ════════════════════════════════════════════════════════
+                    // CABEZA — this.head  (posición y=0.65)
+                    // ════════════════════════════════════════════════════════
+                    const headGrp = new THREE.Group();
+                    headGrp.position.y = 0.65;
+
+                    // Pasamontañas / balaclava (cara)
+                    headGrp.add(sm(mBase, 0.36, 0.34, 0.32, 0, 0, 0));
+                    // Zona de ojos: visera táctica (visor/goggles)
+                    headGrp.add(sm(mVisor, 0.30, 0.10, 0.06, 0, 0.06, 0.17));
+                    // Montura de las gafas (plástico oscuro)
+                    headGrp.add(sm(mBlack, 0.34, 0.12, 0.04, 0, 0.06, 0.16));
+                    // Lente izquierdo
+                    const gogL = new THREE.Mesh(new THREE.SphereGeometry(0.055,8,6), mVisor);
+                    gogL.position.set(-0.095, 0.06, 0.175); headGrp.add(gogL);
+                    // Lente derecho
+                    const gogR = gogL.clone();
+                    gogR.position.set(0.095, 0.06, 0.175); headGrp.add(gogR);
+                    // Casco balístico (forma levemente curvada con box)
+                    headGrp.add(sm(mDark, 0.42, 0.18, 0.44, 0, 0.20, -0.01));
+                    headGrp.add(sm(mDark, 0.40, 0.12, 0.40, 0, 0.27, 0)); // cúpula
+                    // Borde frontal del casco
+                    headGrp.add(sm(mDark, 0.40, 0.05, 0.08, 0, 0.10, 0.21));
+                    // Borde trasero del casco (más pronunciado)
+                    headGrp.add(sm(mDark, 0.38, 0.06, 0.07, 0, 0.12, -0.22));
+                    // Velcro del casco (parche de identificación)
+                    headGrp.add(sm(mLight, 0.12, 0.09, 0.02, 0, 0.22, 0.21));
+                    // Sistema de NVG mount (varilla + soporte)
+                    headGrp.add(sm(mMetal, 0.06, 0.04, 0.16, 0, 0.30, 0.17));
+                    // Rieles laterales del casco (RAILS)
+                    headGrp.add(sm(mMetal, 0.03, 0.10, 0.40, -0.22, 0.22, 0));
+                    headGrp.add(sm(mMetal, 0.03, 0.10, 0.40,  0.22, 0.22, 0));
+                    // Correa del casco (chin strap)
+                    headGrp.add(sm(mDark, 0.03, 0.20, 0.04, -0.17, 0.00, 0.10));
+                    headGrp.add(sm(mDark, 0.03, 0.20, 0.04,  0.17, 0.00, 0.10));
+                    // Máscara inferior (boca/nariz cubierta)
+                    headGrp.add(sm(mBase, 0.30, 0.12, 0.08, 0, -0.10, 0.16));
+                    // Oídos / auricular táctico izquierdo
+                    headGrp.add(sm(mMetal, 0.04, 0.10, 0.14, -0.20, 0.06, 0));
+                    // Antena de radio (pequeña, en el casco)
+                    headGrp.add(sm(mBlack, 0.02, 0.14, 0.02, -0.18, 0.34, -0.08));
+
+                    this.mesh.add(headGrp);
+                    this.head = headGrp;
+
+                    // ════════════════════════════════════════════════════════
+                    // PIERNAS — this.legL / this.legR  (pivote en cadera)
+                    // ════════════════════════════════════════════════════════
+                    function buildLeg(side) {  // side: -1=izquierda, +1=derecha
+                        const lg = new THREE.Group();
+                        lg.position.set(side * 0.20, -0.28, 0);
+
+                        // Muslo / pantalón táctico superior
+                        lg.add(sm(mBase, 0.22, 0.34, 0.24, 0, -0.17, 0));
+                        // Bolsillo de muslo (cargo pocket)
+                        lg.add(sm(mDark, 0.09, 0.14, 0.07, side*0.12, -0.18, 0.10));
+                        // Rodillera táctica
+                        lg.add(sm(mKnee, 0.22, 0.14, 0.10, 0, -0.40, 0.07));
+                        // Shin / espinilla (pantorrilla táctica)
+                        lg.add(sm(mBase, 0.18, 0.28, 0.20, 0, -0.58, 0));
+                        // Bota táctica (parte superior)
+                        lg.add(sm(mBoot, 0.22, 0.13, 0.28, 0, -0.76, 0.02));
+                        // Suela de la bota
+                        lg.add(sm(mBlack, 0.24, 0.06, 0.32, 0, -0.83, 0.03));
+                        // Correa de la bota
+                        lg.add(sm(mMetal, 0.20, 0.03, 0.02, 0, -0.72, 0.15));
+                        // Detalle de holster / portamagazine en muslo izquierdo
+                        if (side === -1) lg.add(sm(mDark, 0.06, 0.14, 0.08, -0.12, -0.26, 0.12));
+
+                        return lg;
+                    }
+
+                    const legLGrp = buildLeg(-1);
+                    const legRGrp = buildLeg(1);
+                    this.mesh.add(legLGrp);
+                    this.mesh.add(legRGrp);
+                    this.legL = legLGrp;
+                    this.legR = legRGrp;
+
+                    // ════════════════════════════════════════════════════════
+                    // BRAZOS — this.armL / this.armR  (pivote en hombro)
+                    // ════════════════════════════════════════════════════════
+                    function buildArmPivot(side) {  // side: -1=izquierdo, +1=derecho
+                        const pivot = new THREE.Group();
+                        pivot.position.set(side * 0.46, 0.40, 0);
+
+                        // Hombrera táctica (shoulder pad)
+                        pivot.add(sm(mLight, 0.14, 0.14, 0.18, 0, 0.04, 0));
+                        // Brazo superior (manga táctica)
+                        pivot.add(sm(mBase, 0.17, 0.26, 0.17, 0, -0.14, 0));
+                        // Codo / protector de codo
+                        pivot.add(sm(mKnee, 0.18, 0.10, 0.12, 0, -0.30, 0.03));
+                        // Antebrazo (manga)
+                        pivot.add(sm(mBase, 0.14, 0.22, 0.14, 0, -0.46, 0));
+                        // Guante táctico (mano)
+                        pivot.add(sm(mBlack, 0.14, 0.12, 0.16, 0, -0.62, 0.02));
+                        // Nudillos reforzados del guante
+                        [[-0.04,0.04], [0,0.04], [0.04,0.04]].forEach(([kx,kz]) =>
+                            pivot.add(sm(mMetal, 0.03, 0.03, 0.03, kx, -0.58, kz+0.08))
+                        );
+                        // Parche de identificación en brazo izquierdo (IR patch)
+                        if (side === -1) pivot.add(sm(mStripe, 0.02, 0.08, 0.12, -0.09, -0.12, 0));
+
+                        return pivot;
+                    }
+
+                    const armLPivot = buildArmPivot(-1);
+                    const armRPivot = buildArmPivot(1);
                     this.mesh.add(armLPivot);
-                    const armL = new THREE.Mesh(armGeo, mat);
-                    armL.position.set(0, -0.3, 0); // hang down from shoulder
-                    armL.castShadow = true;
-                    armLPivot.add(armL);
-                    this.armL = armLPivot; // rotate the pivot = rotate from shoulder
-
-                    // armR: pivot at shoulder (0.62, 0.4, 0), mesh hangs -0.3 below
-                    // This makes rotation.x/z pivot from the shoulder joint, not the arm center.
-                    const armRPivot = new THREE.Group();
-                    armRPivot.position.set(0.62, 0.4, 0); // shoulder position
                     this.mesh.add(armRPivot);
-                    const armR = new THREE.Mesh(armGeo, mat);
-                    armR.position.set(0, -0.3, 0); // hang down from shoulder
-                    armR.castShadow = true;
-                    armRPivot.add(armR);
-                    this.armR = armRPivot; // rotate the pivot = rotate from shoulder
-
-                    // Eyes (White)
-                    const eyeGeo = new THREE.SphereGeometry(0.08, 8, 8);
-
-                    const eyeMat = new THREE.MeshBasicMaterial({
-                        color: 0xffffff
-                    });
-                    const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
-                    eyeL.position.set(-0.2, 0.65, 0.35);
-                    this.mesh.add(eyeL);
-                    const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
-                    eyeR.position.set(0.2, 0.65, 0.35);
-                    this.mesh.add(eyeR);
+                    this.armL = armLPivot;
+                    this.armR = armRPivot;
 
                     // Weapon Model
                     this.currentWeaponKey = weaponKey;
-                    this.weaponModel = createWeaponModel(weaponKey);
+                    this.weaponModel = createWeaponModel(weaponKey, (WEAPONS[weaponKey] || WEAPONS.ar).color);
                     // Add weapon to armL pivot — at hand position (0, -0.6, 0) relative to pivot
                     // (pivot is at shoulder y=0.4, hand is 0.6 below = pivot y - 0.6)
                     this.weaponModel.position.set(0, -0.6, 0);
@@ -6087,7 +6289,7 @@
                     this.projSpeed = w.speed;
                     this.reloadTime = w.reload;
                     this.fireRate = w.cd;
-                    this.projColor = w.color;
+                    this.projColor = 0x999999;  // balas siempre grises
                     this.maxAmmo = w.maxAmmo || 30;
                     this.ammo = Math.min(this.ammo, this.maxAmmo);
                     this.range = w.range || 100;
@@ -6096,7 +6298,7 @@
                     if (this.currentWeaponKey !== key && this.weaponModel) {
                         this.armL.remove(this.weaponModel);
                         this.currentWeaponKey = key;
-                        this.weaponModel = createWeaponModel(key);
+                        this.weaponModel = createWeaponModel(key, w.color);
                         this.weaponModel.position.set(0, -0.6, 0);
                         this.armL.add(this.weaponModel);
                     }
@@ -6132,23 +6334,30 @@
                     this.hp -= amount;
                     SFX.impact('bot', sfxDistVol(this.mesh.position));
 
-                    this.mesh.children.forEach(c => {
-                        if (c.material && c.material.type === 'MeshStandardMaterial') {
-                            c.material.color.setHex(0xffffff);
+                    // Flash blanco — traverse todos los descendientes
+                    this.mesh.traverse(child => {
+                        if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                            if (!child.material.userData.origColor) {
+                                child.material.userData.origColor = child.material.color.getHex();
+                            }
+                            child.material.color.setHex(0xffffff);
+                            child.material.emissive.setHex(0xffffff);
+                            child.material.emissiveIntensity = 0.6;
                         }
                     });
 
                     if (this.hitFlashTimer) clearTimeout(this.hitFlashTimer);
 
                     this.hitFlashTimer = setTimeout(() => {
-                        this.mesh.children.forEach(c => {
-                            if (c.material && c.material.type === 'MeshStandardMaterial') {
-                                c.material.color.setHex(this.color);
+                        this.mesh.traverse(child => {
+                            if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                                const orig = child.material.userData.origColor;
+                                if (orig !== undefined) child.material.color.setHex(orig);
+                                child.material.emissive.setHex(0x000000);
+                                child.material.emissiveIntensity = 0;
                             }
                         });
-                    }
-
-                        , 100);
+                    }, 100);
                 }
 
                 update(dt) {
@@ -6340,19 +6549,18 @@
                         // Shoulders stay fixed at their original positions (±0.62).
                         // Instead, arms rotate inward (Y axis) and the weapon slides
                         // in local X so it always appears at world center when aiming.
-                        this.armL.position.x = -0.62;
-                        this.armR.position.x =  0.62;
+                        this.armL.position.x = -0.46;
+                        this.armR.position.x =  0.46;
 
-                        // Mover hombros hacia adelante al apuntar para que los brazos lleguen al arma
-                        this.armL.position.z = aimT * 0.35;
-                        this.armR.position.z = aimT * 0.35;
+                        this.armL.position.z = 0;
+                        this.armR.position.z = 0;
 
-                        // armL: más cerrado
+                        // armL: porta el arma — rota hacia adelante al apuntar
                         this.armL.rotation.x = -Math.PI / 2 + this.recoil;
                         this.armL.rotation.y = 0;
                         this.armL.rotation.z = aimT * 0.75;
 
-                        // armR: más cerrado
+                        // armR: apoyo — cierra simétricamente
                         const targetRx = -Math.PI / 2 * aimT + this.recoil * 0.6 * aimT;
                         const targetRz = -aimT * 0.95;
                         this.armR.rotation.x += (targetRx - this.armR.rotation.x) * 0.15;
@@ -6360,7 +6568,8 @@
                         this.armR.rotation.z += (targetRz - this.armR.rotation.z) * 0.15;
 
                         if (this.weaponModel) {
-                            this.weaponModel.position.x = aimT * 0.30;
+                            // armL en x=-0.46 + rotZ=0.75 → arma se va izquierda; compensar con +0.22
+                            this.weaponModel.position.x = aimT * 0.17;
                             this.weaponModel.position.y = -0.6;
                             this.weaponModel.position.z = 0;
                             // El arma debe quedar con la misma orientación mundial que el mesh del jugador
@@ -7062,7 +7271,7 @@
                 if (kcBulletMesh) { scene.remove(kcBulletMesh); kcBulletMesh = null; }
                 kcBulletAppearElapsed = null;
                 const bMat = new THREE.MeshBasicMaterial({ color: info.projColor != null ? info.projColor : 0xffffff });
-                kcBulletMesh = new THREE.Mesh(new THREE.SphereGeometry(0.32, 8, 8), bMat);
+                kcBulletMesh = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 8), bMat);
                 kcBulletMesh.position.copy(kcBulletPos);
                 kcBulletMesh.visible = false;  // oculta hasta que replayT alcance el momento del disparo
                 scene.add(kcBulletMesh);
@@ -7286,8 +7495,8 @@
                 for (const rp of kcReplayProjectiles) {
                     if (!rp.spawned && replayT >= rp.t) {
                         rp.spawned = true;
-                        const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.3), new THREE.MeshBasicMaterial({
-                            color: rp.color != null ? rp.color : 0xffffff
+                        const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.15), new THREE.MeshBasicMaterial({
+                            color: 0x999999
                         }));
                         mesh.position.copy(rp.pos);
                         scene.add(mesh);
@@ -7435,8 +7644,8 @@
             window.clearMenuBots = clearLobbyBots;
 
             function spawnProjectile(pos, dir, speed, ownerId, damage, color, range = 100) {
-                const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.3), new THREE.MeshBasicMaterial({
-                    color: color != null ? color : 0xffffff
+                const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.15), new THREE.MeshBasicMaterial({
+                    color: 0x999999
                 }));
                 mesh.position.copy(pos);
                 scene.add(mesh);
@@ -7662,6 +7871,24 @@
             // ... Collisions & Loop ...
             // (Remaining functions logic)
 
+            // Flash de chispa blanca al impactar objeto sólido
+            function spawnImpactFlash(pos) {
+                const flashGeo = new THREE.SphereGeometry(0.18, 5, 4);
+                const flashMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const flash = new THREE.Mesh(flashGeo, flashMat);
+                flash.position.copy(pos);
+                scene.add(flash);
+                let life = 0.07; // segundos
+                const tickFlash = (dt) => {
+                    life -= dt;
+                    if (life <= 0) { scene.remove(flash); return; }
+                    flash.scale.setScalar(1 + (0.07 - life) * 8);
+                    flash.material.opacity = life / 0.07;
+                    requestAnimationFrame(() => tickFlash(0.016));
+                };
+                requestAnimationFrame(() => tickFlash(0.016));
+            }
+
             function checkCollisions() {
 
                 // Proj vs Environment/Players
@@ -7741,6 +7968,8 @@
                             }
                             if (hitSolid) {
                                 SFX.impact('rock', sfxDistVol(p.mesh.position));
+                                // Flash de impacto: chispa blanca en el punto de colisión
+                                spawnImpactFlash(p.mesh.position.clone());
                                 scene.remove(p.mesh);
                                 projectiles.splice(i, 1);
                                 continue;
